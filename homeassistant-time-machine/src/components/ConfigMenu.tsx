@@ -19,6 +19,7 @@ export default function ConfigMenu({ onClose, onSave, initialBackupFolderPath, i
   const [scheduleFrequency, setScheduleFrequency] = useState('daily'); // 'hourly', 'daily', 'weekly'
   const [scheduleTime, setScheduleTime] = useState('00:00'); // HH:MM format
   const [testConnectionMessage, setTestConnectionMessage] = useState<string | null>(null);
+  const [backupNowMessage, setBackupNowMessage] = useState<string | null>(null);
 
   // Helper to convert cron to schedule frequency and time
   const cronToSchedule = (cron: string) => {
@@ -124,6 +125,22 @@ export default function ConfigMenu({ onClose, onSave, initialBackupFolderPath, i
     }
   };
 
+  const handleBackupNow = async () => {
+    setBackupNowMessage('Starting backup...');
+    try {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const response = await fetch('/api/backup-now', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ backupFolderPath, liveFolderPath, timezone }),
+      });
+      const data = await response.json();
+      setBackupNowMessage(data.message);
+    } catch (error) {
+      setBackupNowMessage('Failed to connect to API.');
+    }
+  };
+
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
       <div style={{ backgroundColor: '#2d2d2d', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.05)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', width: '400px' }}>
@@ -154,9 +171,20 @@ export default function ConfigMenu({ onClose, onSave, initialBackupFolderPath, i
           >
             Test Connection
           </button>
+          <button
+            onClick={handleBackupNow}
+            style={{ marginTop: '12px', marginLeft: '12px', padding: '8px 16px', borderRadius: '8px', fontWeight: '500', fontSize: '14px', border: '1px solid rgba(255, 255, 255, 0.1)', cursor: 'pointer', backgroundColor: 'transparent', color: '#9ca3af' }}
+          >
+            Backup Now
+          </button>
           {testConnectionMessage && (
             <p style={{ marginTop: '8px', fontSize: '12px', color: testConnectionMessage.includes('successful') ? '#4CAF50' : '#ef4444' }}>
               {testConnectionMessage}
+            </p>
+          )}
+          {backupNowMessage && (
+            <p style={{ marginTop: '8px', fontSize: '12px', color: backupNowMessage.includes('successfully') ? '#4CAF50' : '#ef4444' }}>
+              {backupNowMessage}
             </p>
           )}
         </div>

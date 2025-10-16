@@ -1,6 +1,6 @@
 # Home Assistant Time Machine
 
-Home Assistant Time Machine is a web-based tool that acts as a "Time Machine" for your Home Assistant configuration. It allows you to browse your existing file-based backups and restore individual automations and scripts to your live configuration.
+Home Assistant Time Machine is a web-based tool that acts as a "Time Machine" for your Home Assistant configuration. It allows you to browse yaml backups and restore individual automations and scripts to your live configuration.
 
 ## Screenshots
 
@@ -11,7 +11,7 @@ Home Assistant Time Machine is a web-based tool that acts as a "Time Machine" fo
 
 ## Features
 
-*   **Browse Backups:** Easily browse through your existing Home Assistant backups.
+*   **Browse Backups:** Easily browse through your Home Assistant backup yaml files.
 *   **View Changes:** See a side-by-side diff of the changes between a backed-up item and the live version.
 *   **Restore Individual Items:** Restore individual automations or scripts without having to restore an entire backup.
 *   **Safety first:** It automatically creates a backup of your yaml files in your backups folder before restoring anything.
@@ -51,7 +51,7 @@ This method is for users who do not have the Home Assistant Add-on store or pref
 
 ### Running the Container
 
-Once you have the image (either by pulling or building), run it with this command:
+Once you have the image, run it with this command:
 
 ```bash
 docker run -d \
@@ -65,7 +65,6 @@ docker run -d \
 **Important:**
 *   Replace `/path/to/your/ha/config` with the absolute path to your Home Assistant configuration directory.
 *   Replace `/path/to/your/backups` with the absolute path to your backup directory.
-*   If you pulled a named image (e.g., `your-docker-username/ha-time-machine`), use that name at the end of the `docker run` command.
 
 After running the container, proceed to the "Usage" section to configure the application through its web UI at `http://localhost:3000`.
 
@@ -77,7 +76,7 @@ After running the container, proceed to the "Usage" section to configure the app
 4.  **In-app setup:**
     *   In the web UI, go to the settings menu.
     *   **Live Home Assistant Folder Path:** Set the path to your Home Assistant configuration directory (e.g., `/config`).
-    *   **Backup Folder Path:** Set the path to the directory where your backups are stored.
+    *   **Backup Folder Path:** Set the path to the directory where your backups are stored (e.g., `/media/backups/yaml`).
     *   **Home Assistant URL & Token:** Set the URL and a Long-Lived Access Token for your Home Assistant instance. This is needed for the feature that reloads Home Assistant after a restore.
     *   **Enable Scheduled Backup:** Toggle this option to enable or disable automatic backups.
     *   **Frequency:** Choose how often you want backups to run (e.g., Hourly, Daily, Weekly).
