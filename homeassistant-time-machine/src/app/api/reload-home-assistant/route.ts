@@ -29,14 +29,21 @@ export async function POST(request: Request) {
 
     console.log('Fetch options for Home Assistant API:', fetchOptions);
 
-    const response = await fetch(`${haUrl}/api/services/${service.replace('.', '/')}`, fetchOptions);
+    // Do not await the fetch call to make it non-blocking
+    fetch(`${haUrl}/api/services/${service.replace('.', '/')}`, fetchOptions)
+      .then(async (response) => {
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`Failed to reload Home Assistant in background: ${errorText}`);
+        } else {
+          console.log('Home Assistant reload initiated successfully in background.');
+        }
+      })
+      .catch((error) => {
+        console.error('Error initiating Home Assistant reload in background:', error);
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      return NextResponse.json({ error: `Failed to reload Home Assistant: ${errorText}` }, { status: response.status });
-    }
-
-    return NextResponse.json({ message: 'Home Assistant reloaded successfully' });
+    return NextResponse.json({ message: 'Home Assistant reload initiated successfully' });
   } catch (error: unknown) {
     const err = error as Error;
     return NextResponse.json({ error: err.message }, { status: 500 });
