@@ -196,7 +196,31 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
   };
 
   const handleRestore = async (fileName: string, content: string) => {
+    let originalSchedule = null;
     try {
+      // 1. Fetch current schedule
+      const scheduleResponse = await fetch('/api/schedule-backup');
+      const scheduleData = await scheduleResponse.json();
+      if (scheduleData.jobs && scheduleData.jobs['default-backup-job']) {
+        originalSchedule = scheduleData.jobs['default-backup-job'];
+
+        // 2. Disable scheduled backup if it was enabled
+        if (originalSchedule.enabled) {
+          await fetch('/api/schedule-backup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: 'default-backup-job',
+              cronExpression: originalSchedule.cronExpression,
+              enabled: false,
+              backupFolderPath: originalSchedule.backupFolderPath,
+              liveFolderPath: originalSchedule.liveFolderPath,
+              timezone: originalSchedule.timezone,
+            }),
+          });
+        }
+      }
+
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const response = await fetch('/api/restore-lovelace-file', {
         method: 'POST',
@@ -215,6 +239,22 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
       const error = err as Error;
       setNotificationMessage(`Error: ${error.message}`);
       setNotificationType('error');
+    } finally {
+      // 4. Re-enable scheduled backup if it was originally enabled
+      if (originalSchedule && originalSchedule.enabled) {
+        await fetch('/api/schedule-backup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: 'default-backup-job',
+            cronExpression: originalSchedule.cronExpression,
+            enabled: true,
+            backupFolderPath: originalSchedule.backupFolderPath,
+            liveFolderPath: originalSchedule.liveFolderPath,
+            timezone: originalSchedule.timezone,
+          }),
+        });
+      }
     }
   };
 
