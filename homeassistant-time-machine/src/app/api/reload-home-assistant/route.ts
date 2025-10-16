@@ -10,6 +10,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
     }
 
+    console.log('Service received:', service);
+
     const fetchOptions: RequestInit = {
       method: 'POST',
       headers: {
@@ -24,6 +26,8 @@ export async function POST(request: Request) {
       };
       fetchOptions.body = JSON.stringify({});
     }
+
+    console.log('Fetch options for Home Assistant API:', fetchOptions);
 
     const response = await fetch(`${haUrl}/api/services/${service.replace('.', '/')}`, fetchOptions);
 
