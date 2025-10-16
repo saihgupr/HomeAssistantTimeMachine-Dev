@@ -18,8 +18,8 @@ async function getBackupDirs(dir: string): Promise<BackupInfo[]> {
     if (dirent.isDirectory()) {
       // Regex to match the final timestamped folder, e.g., 2025-06-02-215431
       if (/\d{4}-\d{2}-\d{2}-\d{6}$/.test(dirent.name)) {
-        const stats = await fs.stat(fullPath);
-        results.push({ path: fullPath, createdAt: stats.birthtimeMs });
+        const date = new Date(dirent.name.replace(/(\d{4}-\d{2}-\d{2})-(\d{2})(\d{2})(\d{2})/, '$1T$2:$3:$4'));
+        results.push({ path: fullPath, createdAt: date.getTime() });
       } else {
         // Continue scanning deeper
         results = results.concat(await getBackupDirs(fullPath));
