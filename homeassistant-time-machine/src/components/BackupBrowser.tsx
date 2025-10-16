@@ -303,7 +303,7 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...haConfig, service: 'home_assistant.restart' }),
+        body: JSON.stringify({ ...haConfig, service: 'homeassistant.restart' }),
       });
 
       if (!response.ok) {
