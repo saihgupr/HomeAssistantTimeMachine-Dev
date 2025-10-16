@@ -18,7 +18,13 @@ async function getBackupDirs(dir: string): Promise<BackupInfo[]> {
     if (dirent.isDirectory()) {
       // Regex to match the final timestamped folder, e.g., 2025-06-02-215431
       if (/\d{4}-\d{2}-\d{2}-\d{6}$/.test(dirent.name)) {
-        const date = new Date(dirent.name.replace(/(\d{4}-\d{2}-\d{2})-(\d{2})(\d{2})(\d{2})/, '$1T$2:$3:$4'));
+        const year = parseInt(dirent.name.substring(0, 4));
+        const month = parseInt(dirent.name.substring(5, 7)) - 1; // Month is 0-indexed
+        const day = parseInt(dirent.name.substring(8, 10));
+        const hour = parseInt(dirent.name.substring(11, 13));
+        const minute = parseInt(dirent.name.substring(13, 15));
+        const second = parseInt(dirent.name.substring(15, 17));
+        const date = new Date(year, month, day, hour, minute, second);
         results.push({ path: fullPath, createdAt: date.getTime() });
       } else {
         // Continue scanning deeper
