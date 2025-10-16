@@ -367,15 +367,18 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
 
   const formatTimestamp = (timestamp: number) => {
     const date = new Date(timestamp);
+    const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const formattedDate = new Intl.DateTimeFormat('en-US', {
       month: 'short',
       day: '2-digit',
       year: 'numeric',
+      timeZone: userTimeZone,
     }).format(date);
     const formattedTime = new Intl.DateTimeFormat('en-US', {
       hour: 'numeric',
       minute: '2-digit',
-      hour12: true
+      hour12: true,
+      timeZone: userTimeZone,
     }).format(date);
     return `${formattedDate} at ${formattedTime}`;
   };
