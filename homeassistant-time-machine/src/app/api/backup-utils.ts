@@ -44,31 +44,23 @@ export async function createBackup(liveConfigPath: string, backupRootPath: strin
     const backupStoragePath = path.join(backupDir, '.storage');
     await fs.mkdir(backupStoragePath, { recursive: true });
 
-    const lovelaceFilesToBackup = [
-        'lovelace',
-        'lovelace_dashboards',
-        'lovelace_resources'
-    ];
+    try {
+        const storageFiles = await fs.readdir(storagePath);
+        const lovelaceFiles = storageFiles.filter(file => file.startsWith('lovelace'));
 
-    for (const file of lovelaceFilesToBackup) {
-        const sourcePath = path.join(storagePath, file);
-        const destinationPath = path.join(backupStoragePath, file);
-        try {
-            await fs.copyFile(sourcePath, destinationPath);
-        } catch (error: any) {
-            if (error.code !== 'ENOENT') {
-                console.error(`Error copying ${file}:`, error);
+        for (const file of lovelaceFiles) {
+            const sourcePath = path.join(storagePath, file);
+            const destinationPath = path.join(backupStoragePath, file);
+            try {
+                await fs.copyFile(sourcePath, destinationPath);
+            } catch (error: any) {
+                if (error.code !== 'ENOENT') {
+                    console.error(`Error copying ${file}:`, error);
+                }
             }
         }
-    }
-
-    const storageFiles = await fs.readdir(storagePath);
-    const dashboardFiles = storageFiles.filter(file => file.startsWith('lovelace.dashboard_'));
-
-    for (const file of dashboardFiles) {
-        const sourcePath = path.join(storagePath, file);
-        const destinationPath = path.join(backupStoragePath, file);
-        await fs.copyFile(sourcePath, destinationPath);
+    } catch (error: any) {
+        console.error(`Error reading .storage directory:`, error);
     }
 
     return { backupDir };
