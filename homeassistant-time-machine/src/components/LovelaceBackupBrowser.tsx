@@ -208,8 +208,6 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
         throw new Error(errorData.error || `Failed to restore ${fileName}`);
       }
 
-      setNotificationMessage(`Lovelace file restored successfully!`);
-      setNotificationType('success');
       setSelectedItem(null);
       reloadHomeAssistant();
     } catch (err: unknown) {

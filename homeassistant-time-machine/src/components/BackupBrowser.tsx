@@ -261,21 +261,23 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
           return;
       }
 
-      const response = await fetch('/api/reload-home-assistant', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ...haConfig, service }),
-      });
+      if (mode !== 'lovelace') {
+        const response = await fetch('/api/reload-home-assistant', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ...haConfig, service }),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Failed to reload ${mode} in Home Assistant.`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `Failed to reload ${mode} in Home Assistant.`);
+        }
       }
 
       if (mode === 'lovelace') {
-        setNotificationMessage(`Lovelace themes reloaded. A manual browser refresh may be required to see all changes.`);
+        setNotificationMessage(`Lovelace file restored. A manual browser refresh is required to see changes.`);
       } else {
         setNotificationMessage(`${mode === 'automations' ? 'Automation' : 'Script'}s reloaded successfully in Home Assistant!`);
       }
