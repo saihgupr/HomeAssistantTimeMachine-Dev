@@ -311,8 +311,8 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
         throw new Error(errorData.error || 'Failed to restart Home Assistant.');
       }
 
-      setNotificationMessage('Home Assistant is restarting.');
-      setNotificationType('success');
+      // setNotificationMessage('Home Assistant is restarting.');
+      // setNotificationType('success');
     } catch (error: unknown) {
       const err = error as Error;
       setNotificationMessage(`Error restarting Home Assistant: ${err.message}`);

@@ -16,10 +16,16 @@ export async function POST(request: Request) {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${haToken}`,
-        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({}),
     };
+
+    if (service !== 'homeassistant.restart') {
+      fetchOptions.headers = {
+        ...fetchOptions.headers,
+        'Content-Type': 'application/json',
+      };
+      fetchOptions.body = JSON.stringify({});
+    }
 
     console.log('Fetch options for Home Assistant API:', fetchOptions);
 
