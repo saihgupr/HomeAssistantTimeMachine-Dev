@@ -121,3 +121,29 @@ The addon can be configured through the Home Assistant UI.
 *   **Web interface port:** The port on your host machine that will be mapped to the addon's web interface.
 
 All other configuration is done within the application's web UI.
+
+## API
+
+### Endpoints
+
+#### `POST /api/backup-now`
+
+Triggers an immediate backup of the Home Assistant configuration files.
+
+**Request Body (JSON):**
+
+*   `liveFolderPath` (string, required): The absolute path to your live Home Assistant configuration directory.
+*   `backupFolderPath` (string, required): The absolute path to the directory where you want to store backups.
+*   `timezone` (string, required): The timezone to use for the backup timestamp (e.g., `America/New_York`).
+
+**Example:**
+
+```bash
+curl -X POST http://localhost:3000/api/backup-now \
+-H "Content-Type: application/json" \
+-d '{
+  "liveFolderPath": "/config",
+  "backupFolderPath": "/media/backups/yaml",
+  "timezone": "America/New_York"
+}'
+```
