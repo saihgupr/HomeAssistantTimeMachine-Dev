@@ -10,13 +10,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
     }
 
-    const response = await fetch(`${haUrl}/api/services/${service.replace('.', '/')}`, {
+    const fetchOptions: RequestInit = {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${haToken}`,
-        'Content-Type': 'application/json',
       },
-    });
+    };
+
+    if (service !== 'home_assistant.restart') {
+      fetchOptions.headers = {
+        ...fetchOptions.headers,
+        'Content-Type': 'application/json',
+      };
+      fetchOptions.body = JSON.stringify({});
+    }
+
+    const response = await fetch(`${haUrl}/api/services/${service.replace('.', '/')}`, fetchOptions);
 
     if (!response.ok) {
       const errorText = await response.text();
