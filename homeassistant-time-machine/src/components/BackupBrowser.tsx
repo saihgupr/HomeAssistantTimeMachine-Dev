@@ -262,7 +262,6 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
           return;
       }
 
-      if (mode !== 'lovelace') {
         const response = await fetch('/api/reload-home-assistant', {
           method: 'POST',
           headers: {
@@ -275,7 +274,6 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
           const errorData = await response.json();
           throw new Error(errorData.error || `Failed to reload ${mode} in Home Assistant.`);
         }
-      }
 
       if (mode === 'lovelace') {
         setNotificationMessage(`Lovelace file restored. A manual browser refresh is required to see changes.`);
