@@ -16,6 +16,7 @@ export async function POST(request: Request) {
         'Authorization': `Bearer ${haToken}`,
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({}),
     });
 
     if (!response.ok) {
