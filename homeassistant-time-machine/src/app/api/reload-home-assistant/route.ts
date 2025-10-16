@@ -18,7 +18,7 @@ export async function POST(request: Request) {
         'Authorization': `Bearer ${haToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ service: service }),
+      body: JSON.stringify({}),
     };
 
     console.log('Fetch options for Home Assistant API:', fetchOptions);
