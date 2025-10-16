@@ -197,10 +197,11 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
 
   const handleRestore = async (fileName: string, content: string) => {
     try {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const response = await fetch('/api/restore-lovelace-file', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ liveConfigPath, fileName, content }),
+        body: JSON.stringify({ liveConfigPath, fileName, content, backupRootPath, timezone }),
       });
 
       if (!response.ok) {
