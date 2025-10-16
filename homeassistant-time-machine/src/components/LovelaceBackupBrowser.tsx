@@ -280,25 +280,6 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
         />
       )}
 
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: '24px' }}>
-        <button
-          onClick={() => setConfigMenuOpen(true)}
-          style={{
-            padding: '10px 24px',
-            borderRadius: '8px',
-            fontWeight: '500',
-            fontSize: '14px',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            cursor: 'pointer',
-            backgroundColor: 'transparent',
-            color: '#9ca3af'
-          }}
-        >
-          Settings
-        </button>
-      </div>
-
       {/* Main Content Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '24px', height: 'calc(100vh - 220px)' }}>
         {/* Backups List */}
