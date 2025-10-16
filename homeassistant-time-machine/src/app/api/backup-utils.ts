@@ -29,12 +29,45 @@ export async function createBackup(liveConfigPath: string, backupRootPath: strin
     const backupDir = path.join(backupRootPath, year.toString(), month, timestamp);
     await fs.mkdir(backupDir, { recursive: true });
 
+    // Backup YAML files
     const files = await fs.readdir(liveConfigPath);
     const yamlFiles = files.filter(file => file.endsWith('.yaml'));
 
     for (const file of yamlFiles) {
         const sourcePath = path.join(liveConfigPath, file);
         const destinationPath = path.join(backupDir, file);
+        await fs.copyFile(sourcePath, destinationPath);
+    }
+
+    // Backup Lovelace files
+    const storagePath = path.join(liveConfigPath, '.storage');
+    const backupStoragePath = path.join(backupDir, '.storage');
+    await fs.mkdir(backupStoragePath, { recursive: true });
+
+    const lovelaceFilesToBackup = [
+        'lovelace',
+        'lovelace_dashboards',
+        'lovelace_resources'
+    ];
+
+    for (const file of lovelaceFilesToBackup) {
+        const sourcePath = path.join(storagePath, file);
+        const destinationPath = path.join(backupStoragePath, file);
+        try {
+            await fs.copyFile(sourcePath, destinationPath);
+        } catch (error: any) {
+            if (error.code !== 'ENOENT') {
+                console.error(`Error copying ${file}:`, error);
+            }
+        }
+    }
+
+    const storageFiles = await fs.readdir(storagePath);
+    const dashboardFiles = storageFiles.filter(file => file.startsWith('lovelace.dashboard_'));
+
+    for (const file of dashboardFiles) {
+        const sourcePath = path.join(storagePath, file);
+        const destinationPath = path.join(backupStoragePath, file);
         await fs.copyFile(sourcePath, destinationPath);
     }
 
