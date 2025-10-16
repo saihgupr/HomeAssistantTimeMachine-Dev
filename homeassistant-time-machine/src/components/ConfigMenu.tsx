@@ -171,20 +171,9 @@ export default function ConfigMenu({ onClose, onSave, initialBackupFolderPath, i
           >
             Test Connection
           </button>
-          <button
-            onClick={handleBackupNow}
-            style={{ marginTop: '12px', marginLeft: '12px', padding: '8px 16px', borderRadius: '8px', fontWeight: '500', fontSize: '14px', border: '1px solid rgba(255, 255, 255, 0.1)', cursor: 'pointer', backgroundColor: 'transparent', color: '#9ca3af' }}
-          >
-            Backup Now
-          </button>
           {testConnectionMessage && (
             <p style={{ marginTop: '8px', fontSize: '12px', color: testConnectionMessage.includes('successful') ? '#4CAF50' : '#ef4444' }}>
               {testConnectionMessage}
-            </p>
-          )}
-          {backupNowMessage && (
-            <p style={{ marginTop: '8px', fontSize: '12px', color: backupNowMessage.includes('successfully') ? '#4CAF50' : '#ef4444' }}>
-              {backupNowMessage}
             </p>
           )}
         </div>
@@ -210,6 +199,17 @@ export default function ConfigMenu({ onClose, onSave, initialBackupFolderPath, i
             onChange={(e) => setBackupFolderPath(e.target.value)}
             style={{ width: '100%', padding: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', color: 'white', fontSize: '14px' }}
           />
+          <button
+            onClick={handleBackupNow}
+            style={{ marginTop: '12px', padding: '8px 16px', borderRadius: '8px', fontWeight: '500', fontSize: '14px', border: '1px solid rgba(255, 255, 255, 0.1)', cursor: 'pointer', backgroundColor: 'transparent', color: '#9ca3af' }}
+          >
+            Backup Now
+          </button>
+          {backupNowMessage && (
+            <p style={{ marginTop: '8px', fontSize: '12px', color: backupNowMessage.includes('successfully') ? '#4CAF50' : '#ef4444' }}>
+              {backupNowMessage}
+            </p>
+          )}
         </div>
 
         {/* Scheduled Backup Section */}
