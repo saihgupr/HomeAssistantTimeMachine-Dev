@@ -298,12 +298,12 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
     }
 
     try {
-      const response = await fetch('/api/restart-home-assistant', {
+      const response = await fetch('/api/reload-home-assistant', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(haConfig),
+        body: JSON.stringify({ ...haConfig, service: 'home_assistant.restart' }),
       });
 
       if (!response.ok) {
