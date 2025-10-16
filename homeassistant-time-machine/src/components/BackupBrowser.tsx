@@ -275,11 +275,7 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
           throw new Error(errorData.error || `Failed to reload ${mode} in Home Assistant.`);
         }
 
-      if (mode === 'lovelace') {
-        setNotificationMessage(`Lovelace file restored. A manual browser refresh is required to see changes.`);
-      } else {
-        setNotificationMessage(`${mode === 'automations' ? 'Automation' : 'Script'}s reloaded successfully in Home Assistant!`);
-      }
+      setNotificationMessage(`${mode === 'automations' ? 'Automation' : 'Script'}s reloaded successfully in Home Assistant!`);
       setNotificationType('success');
     } catch (error: unknown) {
       const err = error as Error;
