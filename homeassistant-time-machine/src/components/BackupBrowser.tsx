@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import yaml from 'js-yaml';
 import ItemDiffViewer from './ItemDiffViewer';
 import ConfigMenu from './ConfigMenu';
+import LovelaceBackupBrowser from './LovelaceBackupBrowser';
 
 interface BackupInfo {
   path: string;
@@ -30,7 +31,7 @@ interface HaConfig {
   haToken: string;
 }
 
-type Mode = 'automations' | 'scripts';
+type Mode = 'automations' | 'scripts' | 'lovelace';
 
 export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveConfig }: BackupBrowserProps) {
   const [mode, setMode] = useState<Mode>('automations');
@@ -417,6 +418,22 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
           >
             Scripts
           </button>
+          <button
+            onClick={() => setMode('lovelace')}
+            style={{ 
+              padding: '10px 24px', 
+              borderRadius: '8px', 
+              fontWeight: '500', 
+              fontSize: '14px', 
+              border: 'none',
+              cursor: 'pointer',
+              backgroundColor: mode === 'lovelace' ? '#2563eb' : 'transparent',
+              color: mode === 'lovelace' ? 'white' : '#9ca3af',
+              boxShadow: mode === 'lovelace' ? '0 10px 15px -3px rgba(0, 0, 0, 0.3)' : 'none'
+            }}
+          >
+            Lovelace
+          </button>
         </div>
         <button
           onClick={() => setConfigMenuOpen(true)}
@@ -435,168 +452,177 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
         </button>
       </div>
 
-      {/* Main Content Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '24px', height: 'calc(100vh - 220px)' }}>
-        {/* Backups List */}
-        <div style={{ backgroundColor: '#2d2d2d', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.05)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ padding: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'white', marginBottom: '4px' }}>Backups</h2>
-            <p style={{ fontSize: '14px', color: '#9ca3af' }}>{backups.length} snapshots available</p>
-          </div>
-          
-          <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
-            {isLoadingBackups && <p style={{ textAlign: 'center', color: '#9ca3af' }}>Scanning...</p>}
-            {backupError && !isLoadingBackups && <p style={{ textAlign: 'center', color: '#ef4444' }}>{backupError}</p>}
-            {!isLoadingBackups && backups.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {backups.map((backup) => (
-                  <button
-                    key={backup.path} // Use backup name as key
-                    onClick={() => handleSelectBackup(backup)}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      padding: '14px 16px',
-                      borderRadius: '12px',
-                      border: 'none',
-                      cursor: 'pointer',
-                      backgroundColor: selectedBackup?.path === backup.path ? '#2563eb' : 'rgba(255, 255, 255, 0.05)',
-                      color: selectedBackup?.path === backup.path ? 'white' : '#d1d5db',
-                      boxShadow: selectedBackup?.path === backup.path ? '0 10px 15px -3px rgba(0, 0, 0, 0.3)' : 'none'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        backgroundColor: selectedBackup?.path === backup.path ? 'white' : '#6b7280'
-                      }} />
-                      <span style={{ fontWeight: '500' }}>{formatTimestamp(backup.createdAt)}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Items List */}
-        <div style={{ backgroundColor: '#2d2d2d', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.05)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <div style={{ padding: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <div>
-                <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'white', marginBottom: '4px', textTransform: 'capitalize' }}>
-                  {mode}
-                </h2>
-                <p style={{ fontSize: '14px', color: '#9ca3af' }}>
-                  {selectedBackup ? formatTimestamp(selectedBackup.createdAt) : 'No backup selected'}
-                </p>
+      {mode === 'lovelace' ? (
+        <LovelaceBackupBrowser 
+          backupRootPath={backupRootPath}
+          liveConfigPath={liveConfigPath}
+          onSaveConfig={onSaveConfig}
+        />
+      ) : (
+        <>
+          {/* Main Content Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '24px', height: 'calc(100vh - 220px)' }}>
+            {/* Backups List */}
+            <div style={{ backgroundColor: '#2d2d2d', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.05)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <div style={{ padding: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'white', marginBottom: '4px' }}>Backups</h2>
+                <p style={{ fontSize: '14px', color: '#9ca3af' }}>{backups.length} snapshots available</p>
               </div>
               
-              <select
-                value={sortOrder}
-                onChange={(e) => setSortOrder(e.target.value)}
-                style={{ 
-                  padding: '6px 40px 6px 16px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  color: '#d1d5db',
-                  cursor: 'pointer',
-                  appearance: 'none',
-                  WebkitAppearance: 'none',
-                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                  backgroundPosition: 'right 16px center',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundSize: '1em',
-                }}
-              >
-                <option value="default">Default Order</option>
-                <option value="alpha-asc">A → Z</option>
-                <option value="alpha-desc">Z → A</option>
-              </select>
-            </div>
-
-            <div style={{ position: 'relative' }}>
-              <svg style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', width: '20px', height: '20px', color: '#6b7280' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                type="text"
-                placeholder={`Search ${mode}...`}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ width: '100%', paddingLeft: '48px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', color: 'white', fontSize: '14px' }}
-              />
-            </div>
-          </div>
-
-          <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
-            {isLoadingItems && <p style={{ textAlign: 'center', color: '#9ca3af' }}>Loading {mode}...</p>}
-            {error && !isLoadingItems && <p style={{ textAlign: 'center', color: '#ef4444' }}>{error}</p>}
-            {!selectedBackup && (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center' }}>
-                <div style={{ width: '64px', height: '64px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                  <svg style={{ width: '32px', height: '32px', color: '#6b7280' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <p style={{ color: '#9ca3af' }}>Select a backup to view {mode}</p>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+                {isLoadingBackups && <p style={{ textAlign: 'center', color: '#9ca3af' }}>Scanning...</p>}
+                {backupError && !isLoadingBackups && <p style={{ textAlign: 'center', color: '#ef4444' }}>{backupError}</p>}
+                {!isLoadingBackups && backups.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {backups.map((backup) => (
+                      <button
+                        key={backup.path} // Use backup name as key
+                        onClick={() => handleSelectBackup(backup)}
+                        style={{
+                          width: '100%',
+                          textAlign: 'left',
+                          padding: '14px 16px',
+                          borderRadius: '12px',
+                          border: 'none',
+                          cursor: 'pointer',
+                          backgroundColor: selectedBackup?.path === backup.path ? '#2563eb' : 'rgba(255, 255, 255, 0.05)',
+                          color: selectedBackup?.path === backup.path ? 'white' : '#d1d5db',
+                          boxShadow: selectedBackup?.path === backup.path ? '0 10px 15px -3px rgba(0, 0, 0, 0.3)' : 'none'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{
+                            width: '8px',
+                            height: '8px',
+                            borderRadius: '50%',
+                            backgroundColor: selectedBackup?.path === backup.path ? 'white' : '#6b7280'
+                          }} />
+                          <span style={{ fontWeight: '500' }}>{formatTimestamp(backup.createdAt)}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-            {!isLoadingItems && selectedBackup && sortedAndFilteredItems.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {sortedAndFilteredItems.map((item, index) => (
-                  <button
-                    key={`${item.id || ''}-${item.alias || ''}-${index}`}
-                    onClick={() => setSelectedItem(item)}
-                    style={{ width: '100%', textAlign: 'left', padding: '16px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)', cursor: 'pointer' }}
+            </div>
+
+            {/* Items List */}
+            <div style={{ backgroundColor: '#2d2d2d', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.05)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              <div style={{ padding: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                  <div>
+                    <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'white', marginBottom: '4px', textTransform: 'capitalize' }}>
+                      {mode}
+                    </h2>
+                    <p style={{ fontSize: '14px', color: '#9ca3af' }}>
+                      {selectedBackup ? formatTimestamp(selectedBackup.createdAt) : 'No backup selected'}
+                    </p>
+                  </div>
+                  
+                  <select
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value)}
+                    style={{ 
+                      padding: '6px 40px 6px 16px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      color: '#d1d5db',
+                      cursor: 'pointer',
+                      appearance: 'none',
+                      WebkitAppearance: 'none',
+                      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                      backgroundPosition: 'right 16px center',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundSize: '1em',
+                    }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ flex: 1 }}>
-                        <h3 style={{ color: 'white', fontWeight: '500', marginBottom: '4px' }}>
-                          {item.alias || `${mode === 'automations' ? 'Automation' : 'Script'} ${item.id || index + 1}`}
-                        </h3>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {itemStatuses[item.id || item.alias || ''] === 'changed' && (
-                          <span style={{ padding: '4px 12px', backgroundColor: 'rgba(249, 115, 22, 0.2)', color: '#f97316', fontSize: '12px', fontWeight: '500', borderRadius: '9999px', border: '1px solid rgba(249, 115, 22, 0.3)' }}>
-                            Changed
-                          </span>
-                        )}
-                        {itemStatuses[item.id || item.alias || ''] === 'deleted' && (
-                          <span style={{ padding: '4px 12px', backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', fontSize: '12px', fontWeight: '500', borderRadius: '9999px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-                            Deleted
-                          </span>
-                        )}
-                        <svg style={{ width: '20px', height: '20px', color: '#6b7280' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-            {!isLoadingItems && selectedBackup && items.length === 0 && (
-              <p style={{ textAlign: 'center', color: '#6b7280' }}>No {mode} found in this backup file.</p>
-            )}
-          </div>
-        </div>
-      </div>
+                    <option value="default">Default Order</option>
+                    <option value="alpha-asc">A → Z</option>
+                    <option value="alpha-desc">Z → A</option>
+                  </select>
+                </div>
 
-      {selectedItem && (
-        <ItemDiffViewer 
-          backupItem={selectedItem}
-          liveConfigPath={liveConfigPath}
-          mode={mode}
-          backupTimestamp={selectedBackup ? selectedBackup.createdAt : 0}
-          onClose={() => setSelectedItem(null)}
-          onRestore={handleRestore}
-        />
+                <div style={{ position: 'relative' }}>
+                  <svg style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', width: '20px', height: '20px', color: '#6b7280' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder={`Search ${mode}...`}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{ width: '100%', paddingLeft: '48px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', color: 'white', fontSize: '14px' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+                {isLoadingItems && <p style={{ textAlign: 'center', color: '#9ca3af' }}>Loading {mode}...</p>}
+                {error && !isLoadingItems && <p style={{ textAlign: 'center', color: '#ef4444' }}>{error}</p>}
+                {!selectedBackup && (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center' }}>
+                    <div style={{ width: '64px', height: '64px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+                      <svg style={{ width: '32px', height: '32px', color: '#6b7280' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <p style={{ color: '#9ca3af' }}>Select a backup to view {mode}</p>
+                  </div>
+                )}
+                {!isLoadingItems && selectedBackup && sortedAndFilteredItems.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {sortedAndFilteredItems.map((item, index) => (
+                      <button
+                        key={`${item.id || ''}-${item.alias || ''}-${index}`}
+                        onClick={() => setSelectedItem(item)}
+                        style={{ width: '100%', textAlign: 'left', padding: '16px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)', cursor: 'pointer' }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ flex: 1 }}>
+                            <h3 style={{ color: 'white', fontWeight: '500', marginBottom: '4px' }}>
+                              {item.alias || `${mode === 'automations' ? 'Automation' : 'Script'} ${item.id || index + 1}`}
+                            </h3>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {itemStatuses[item.id || item.alias || ''] === 'changed' && (
+                              <span style={{ padding: '4px 12px', backgroundColor: 'rgba(249, 115, 22, 0.2)', color: '#f97316', fontSize: '12px', fontWeight: '500', borderRadius: '9999px', border: '1px solid rgba(249, 115, 22, 0.3)' }}>
+                                Changed
+                              </span>
+                            )}
+                            {itemStatuses[item.id || item.alias || ''] === 'deleted' && (
+                              <span style={{ padding: '4px 12px', backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', fontSize: '12px', fontWeight: '500', borderRadius: '9999px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                                Deleted
+                              </span>
+                            )}
+                            <svg style={{ width: '20px', height: '20px', color: '#6b7280' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {!isLoadingItems && selectedBackup && items.length === 0 && (
+                  <p style={{ textAlign: 'center', color: '#6b7280' }}>No {mode} found in this backup file.</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {selectedItem && (
+            <ItemDiffViewer 
+              backupItem={selectedItem}
+              liveConfigPath={liveConfigPath}
+              mode={mode}
+              backupTimestamp={selectedBackup ? selectedBackup.createdAt : 0}
+              onClose={() => setSelectedItem(null)}
+              onRestore={handleRestore}
+            />
+          )}
+        </>
       )}
-    </>
   );
 }
