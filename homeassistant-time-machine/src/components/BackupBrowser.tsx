@@ -255,8 +255,9 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
           service = 'script.reload';
           break;
         case 'lovelace':
-          service = 'frontend.reload_themes';
-          break;
+          setNotificationMessage('Lovelace file restored. A restart of Home Assistant is required to see changes.');
+          setNotificationType('success');
+          return;
         default:
           return;
       }
@@ -285,6 +286,36 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
     } catch (error: unknown) {
       const err = error as Error;
       setNotificationMessage(`Error reloading Home Assistant: ${err.message}`);
+      setNotificationType('error');
+    }
+  };
+
+  const restartHomeAssistant = async () => {
+    if (!haConfig || !haConfig.haUrl || !haConfig.haToken) {
+      setNotificationMessage('Home Assistant URL or token not configured.');
+      setNotificationType('error');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/restart-home-assistant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(haConfig),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to restart Home Assistant.');
+      }
+
+      setNotificationMessage('Home Assistant is restarting.');
+      setNotificationType('success');
+    } catch (error: unknown) {
+      const err = error as Error;
+      setNotificationMessage(`Error restarting Home Assistant: ${err.message}`);
       setNotificationType('error');
     }
   };
@@ -386,6 +417,11 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
           }}
         >
           {notificationMessage}
+          {mode === 'lovelace' && notificationType === 'success' && (
+            <button onClick={restartHomeAssistant} style={{ background: 'none', border: '1px solid white', color: 'white', fontSize: '14px', cursor: 'pointer', padding: '4px 8px', borderRadius: '4px' }}>
+              Restart Now
+            </button>
+          )}
           <button onClick={() => setNotificationMessage(null)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '18px', cursor: 'pointer' }}>
             &times;
           </button>
