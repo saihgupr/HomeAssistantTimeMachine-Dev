@@ -624,5 +624,6 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
           )}
         </>
       )}
+    </>
   );
 }
