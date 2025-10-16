@@ -246,7 +246,21 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
     }
 
     try {
-      const service = mode === 'automations' ? 'automation.reload' : 'script.reload';
+      let service;
+      switch (mode) {
+        case 'automations':
+          service = 'automation.reload';
+          break;
+        case 'scripts':
+          service = 'script.reload';
+          break;
+        case 'lovelace':
+          service = 'frontend.reload_themes';
+          break;
+        default:
+          return;
+      }
+
       const response = await fetch('/api/reload-home-assistant', {
         method: 'POST',
         headers: {
@@ -260,7 +274,11 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
         throw new Error(errorData.error || `Failed to reload ${mode} in Home Assistant.`);
       }
 
-      setNotificationMessage(`${mode === 'automations' ? 'Automation' : 'Script'}s reloaded successfully in Home Assistant!`);
+      if (mode === 'lovelace') {
+        setNotificationMessage(`Lovelace themes reloaded. A manual browser refresh may be required to see all changes.`);
+      } else {
+        setNotificationMessage(`${mode === 'automations' ? 'Automation' : 'Script'}s reloaded successfully in Home Assistant!`);
+      }
       setNotificationType('success');
     } catch (error: unknown) {
       const err = error as Error;
@@ -457,6 +475,7 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
           backupRootPath={backupRootPath}
           liveConfigPath={liveConfigPath}
           onSaveConfig={onSaveConfig}
+          reloadHomeAssistant={reloadHomeAssistant}
         />
       ) : (
         <>
