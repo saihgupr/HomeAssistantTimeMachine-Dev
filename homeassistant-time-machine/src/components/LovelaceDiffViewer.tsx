@@ -10,10 +10,9 @@ interface LovelaceDiffViewerProps {
   backupTimestamp: number;
   onRestore: (fileName: string, content: string) => void;
   onClose: () => void;
-  reloadHomeAssistant: () => void;
 }
 
-export default function LovelaceDiffViewer({ backupFileContent, liveFileContent, fileName, backupTimestamp, onRestore, onClose, reloadHomeAssistant }: LovelaceDiffViewerProps) {
+export default function LovelaceDiffViewer({ backupFileContent, liveFileContent, fileName, backupTimestamp, onRestore, onClose }: LovelaceDiffViewerProps) {
   const oldContent = liveFileContent ?? `// This file does not exist in the current configuration.`;
   const newContent = backupFileContent;
   const noChanges = oldContent === newContent;
@@ -99,12 +98,6 @@ export default function LovelaceDiffViewer({ backupFileContent, liveFileContent,
             style={{ padding: '10px 24px', backgroundColor: '#2563eb', color: 'white', fontWeight: '500', borderRadius: '12px', border: 'none', cursor: 'pointer', boxShadow: '0 10px 15px -3px rgba(37, 99, 235, 0.2)' }}
           >
             Restore
-          </button>
-          <button 
-            onClick={reloadHomeAssistant} 
-            style={{ padding: '10px 24px', backgroundColor: 'rgba(255, 255, 255, 0.05)', color: '#d1d5db', fontWeight: '500', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.1)', cursor: 'pointer' }}
-          >
-            Reload Lovelace
           </button>
         </footer>
       </div>

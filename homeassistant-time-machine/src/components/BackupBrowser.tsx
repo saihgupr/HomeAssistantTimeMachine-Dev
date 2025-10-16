@@ -475,7 +475,6 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
           backupRootPath={backupRootPath}
           liveConfigPath={liveConfigPath}
           onSaveConfig={onSaveConfig}
-          reloadHomeAssistant={reloadHomeAssistant}
         />
       ) : (
         <>

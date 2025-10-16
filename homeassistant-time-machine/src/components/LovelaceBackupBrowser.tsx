@@ -15,7 +15,6 @@ interface BackupBrowserProps {
   backupRootPath: string;
   liveConfigPath: string;
   onSaveConfig: (config: { haUrl: string; haToken: string; backupFolderPath: string; liveFolderPath: string }) => void;
-  reloadHomeAssistant: () => void;
 }
 
 interface HaConfig {
@@ -23,7 +22,7 @@ interface HaConfig {
   haToken: string;
 }
 
-export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, onSaveConfig, reloadHomeAssistant }: BackupBrowserProps) {
+export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, onSaveConfig }: BackupBrowserProps) {
   const [backups, setBackups] = useState<BackupInfo[]>([]);
   const [isLoadingBackups, setIsLoadingBackups] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -432,7 +431,6 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
           backupTimestamp={selectedBackup ? selectedBackup.createdAt : 0}
           onClose={() => setSelectedItem(null)}
           onRestore={handleRestore}
-          reloadHomeAssistant={reloadHomeAssistant}
         />
       )}
     </>
