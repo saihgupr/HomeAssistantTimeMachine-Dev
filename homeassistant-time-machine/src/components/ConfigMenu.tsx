@@ -272,6 +272,8 @@ export default function ConfigMenu({ onClose, onSave, initialBackupFolderPath, i
                     WebkitAppearance: 'none',
                     MozAppearance: 'none',
                     appearance: 'none',
+                    outline: 'none',
+                    boxShadow: 'none',
                   }}
                 >
                   <option value="hourly">Hourly</option>
@@ -298,6 +300,8 @@ export default function ConfigMenu({ onClose, onSave, initialBackupFolderPath, i
                       WebkitAppearance: 'none', /* Safari and Chrome */
                       MozAppearance: 'none',    /* Firefox */
                       appearance: 'none',       /* Standard */
+                      outline: 'none',
+                      boxShadow: 'none',
                     }}
                   />
                 </div>

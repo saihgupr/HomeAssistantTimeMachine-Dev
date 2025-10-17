@@ -406,6 +406,8 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
                   backgroundPosition: 'right 16px center',
                   backgroundRepeat: 'no-repeat',
                   backgroundSize: '1em',
+                  outline: 'none',
+                  boxShadow: 'none',
                 }}
               >
                 <option value="default">Default Order</option>
