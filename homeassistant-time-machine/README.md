@@ -4,10 +4,12 @@ Home Assistant Time Machine is a web-based tool that acts as a "Time Machine" fo
 
 ## Screenshots
 
-![Screenshot 1](https://i.imgur.com/tckqmy8.png)
-![Screenshot 2](https://i.imgur.com/KOqjUYD.png)
-![Screenshot 4](https://i.imgur.com/GWWwkht.png)
-![Screenshot 3](https://i.imgur.com/LbjZobV.png)
+![Screenshot 1](https://i.imgur.com/h8JovLe.png)
+![Screenshot 4](https://i.imgur.com/gLp9Xke.png)
+![Screenshot 2](https://i.imgur.com/1nsjBY1.png)
+![Screenshot 3](https://i.imgur.com/pkHXhtu.png)
+![Screenshot 5](https://i.imgur.com/606uJun.png)
+
 
 ## Features
 
@@ -122,21 +124,11 @@ The addon can be configured through the Home Assistant UI.
 
 All other configuration is done within the application's web UI.
 
-## API
+## Triggering a Backup via API
 
-### Endpoints
+You can trigger a backup programmatically by sending a POST request to the `/api/backup-now` endpoint. This is the same action that is performed when clicking the "Backup Now" button in the web UI.
 
-#### `POST /api/backup-now`
-
-Triggers an immediate backup of the Home Assistant configuration files.
-
-**Request Body (JSON):**
-
-*   `liveFolderPath` (string, required): The absolute path to your live Home Assistant configuration directory.
-*   `backupFolderPath` (string, required): The absolute path to the directory where you want to store backups.
-*   `timezone` (string, required): The timezone to use for the backup timestamp (e.g., `America/New_York`).
-
-**Example:**
+Here is an example of how to trigger a backup using `curl`:
 
 ```bash
 curl -X POST http://localhost:3000/api/backup-now \
@@ -147,3 +139,9 @@ curl -X POST http://localhost:3000/api/backup-now \
   "timezone": "America/New_York"
 }'
 ```
+
+**Parameters:**
+
+*   `liveFolderPath` (string, required): The absolute path to your live Home Assistant configuration directory.
+*   `backupFolderPath` (string, required): The absolute path to the directory where you want to store backups.
+*   `timezone` (string, required): The timezone to use for the backup timestamp (e.g., `America/New_York`). You can find a list of valid timezones [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).

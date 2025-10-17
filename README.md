@@ -1,13 +1,15 @@
-# Home Assistant Time Machine Dev
+# Home Assistant Time Machine
 
 Home Assistant Time Machine is a web-based tool that acts as a "Time Machine" for your Home Assistant configuration. It allows you to browse yaml backups and restore individual automations and scripts to your live configuration.
 
 ## Screenshots
 
-![Screenshot 1](https://i.imgur.com/tckqmy8.png)
-![Screenshot 2](https://i.imgur.com/KOqjUYD.png)
-![Screenshot 4](https://i.imgur.com/GWWwkht.png)
-![Screenshot 3](https://i.imgur.com/LbjZobV.png)
+![Screenshot 1](https://i.imgur.com/h8JovLe.png)
+![Screenshot 4](https://i.imgur.com/gLp9Xke.png)
+![Screenshot 2](https://i.imgur.com/1nsjBY1.png)
+![Screenshot 3](https://i.imgur.com/pkHXhtu.png)
+![Screenshot 5](https://i.imgur.com/606uJun.png)
+
 
 ## Features
 
