@@ -146,7 +146,7 @@ Here is an example of how to trigger a backup using `curl`:
 curl -X POST http://localhost:3000/api/backup-now \
 -H "Content-Type: application/json" \
 -d 
-'{
+'{ 
   "liveFolderPath": "/config",
   "backupFolderPath": "/media/backups/yaml",
   "timezone": "America/New_York"
