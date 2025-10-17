@@ -20,6 +20,29 @@ interface ItemDiffViewerProps {
 }
 
 export default function ItemDiffViewer({ backupItem, liveConfigPath, mode, backupFolderName, onRestore, onClose }: ItemDiffViewerProps) {
+  const formatFolderName = (folderName: string) => {
+    const year = parseInt(folderName.substring(0, 4));
+    const month = parseInt(folderName.substring(5, 7)) - 1;
+    const day = parseInt(folderName.substring(8, 10));
+    const hour = parseInt(folderName.substring(11, 13));
+    const minute = parseInt(folderName.substring(13, 15));
+    const date = new Date(year, month, day, hour, minute);
+
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric',
+    }).format(date);
+
+    const formattedTime = new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }).format(date);
+
+    return `${formattedDate} at ${formattedTime}`;
+  };
+
   const [liveItem, setLiveItem] = useState<Automation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +102,7 @@ export default function ItemDiffViewer({ backupItem, liveConfigPath, mode, backu
               </h2>
               <p style={{ fontSize: '14px', color: '#9ca3af' }}>
                 {!liveItem
-                  ? `Backup from ${backupFolderName}`
+                  ? `Backup from ${formatFolderName(backupFolderName)}`
                   : noChanges
                   ? 'No changes between backup and live version.'
                   : 'Comparing backup with current live version.'}
@@ -123,7 +146,7 @@ export default function ItemDiffViewer({ backupItem, liveConfigPath, mode, backu
                       <span style={{ fontSize: '14px', fontWeight: '500', color: '#d1d5db' }}>Current Version</span>
                     </div>
                     <div style={{ textAlign: 'center', padding: '8px', backgroundColor: 'rgba(37, 99, 235, 0.2)', borderRadius: '8px', border: '1px solid rgba(37, 99, 235, 0.3)' }}>
-                      <span style={{ fontSize: '14px', fontWeight: '500', color: '#60a5fa' }}>{backupFolderName}</span>
+                      <span style={{ fontSize: '14px', fontWeight: '500', color: '#60a5fa' }}>{formatFolderName(backupFolderName)}</span>
                     </div>
                   </div>
                   <div style={{ backgroundColor: '#1e1e1e', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255, 255, 255, 0.05)' }}>

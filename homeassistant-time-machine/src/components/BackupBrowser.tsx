@@ -53,8 +53,30 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
   const [haConfig, setHaConfig] = useState<HaConfig | null>(null);
   const [initialCronExpression, setInitialCronExpression] = useState('');
 
+  const formatFolderName = (folderName: string) => {
+    const year = parseInt(folderName.substring(0, 4));
+    const month = parseInt(folderName.substring(5, 7)) - 1;
+    const day = parseInt(folderName.substring(8, 10));
+    const hour = parseInt(folderName.substring(11, 13));
+    const minute = parseInt(folderName.substring(13, 15));
+    const date = new Date(year, month, day, hour, minute);
+
+    const formattedDate = new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: '2-digit',
+      year: 'numeric',
+    }).format(date);
+
+    const formattedTime = new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }).format(date);
+
+    return `${formattedDate} at ${formattedTime}`;
+  };
+
   useEffect(() => {
-    const savedConfig = localStorage.getItem('haConfig');
     if (savedConfig) {
       setHaConfig(JSON.parse(savedConfig));
     }
@@ -534,7 +556,7 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
                             borderRadius: '50%',
                             backgroundColor: selectedBackup?.path === backup.path ? 'white' : '#6b7280'
                           }} />
-                          <span style={{ fontWeight: '500' }}>{backup.folderName}</span>
+                          <span style={{ fontWeight: '500' }}>{formatFolderName(backup.folderName)}</span>
                         </div>
                       </button>
                     ))}
@@ -552,7 +574,7 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
                       {mode}
                     </h2>
                     <p style={{ fontSize: '14px', color: '#9ca3af' }}>
-                      {selectedBackup ? selectedBackup.folderName : 'No backup selected'}
+                      {selectedBackup ? formatFolderName(selectedBackup.folderName) : 'No backup selected'}
                     </p>
                   </div>
                   
