@@ -2,6 +2,17 @@
 
 Home Assistant Time Machine is a web-based tool that acts as a "Time Machine" for your Home Assistant configuration. It allows you to browse yaml backups and restore individual automations and scripts to your live configuration.
 
+## What's New!
+
+We've been busy adding exciting new features to enhance your Home Assistant Time Machine experience:
+
+*   **Backup Now Button:** Trigger an immediate backup of your Home Assistant configuration directly from the UI with a single click. This utilizes a new API endpoint for programmatic backups.
+*   **Date-Based Folder Names:** Backup folders are now intelligently named based on the date, making it easier to navigate and find specific backups.
+*   **Docker Container Installation:** Simplified installation process with a dedicated Docker container option, providing more flexibility for users without the Home Assistant Add-on store.
+*   **Optimized Image Size:** The Docker image has been significantly reduced in size through highly optimized image builds, making it faster to download and run.
+*   **Flexible Backup Locations:** You can now store your backups in either the `/share` or `/backup` directories, offering more options for integration with your Home Assistant setup.
+*   **Lovelace Backup Support:** Comprehensive backup and restore functionality for your Lovelace UI configurations, ensuring your dashboards are always safe.
+
 ## Screenshots
 
 ![Screenshot 1](https://i.imgur.com/h8JovLe.png)
