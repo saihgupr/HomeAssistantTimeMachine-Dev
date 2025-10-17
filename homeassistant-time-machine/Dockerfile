@@ -18,20 +18,23 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Copy package files and install only production dependencies
-COPY package.json package-lock.json ./
-RUN npm install --omit=dev --legacy-peer-deps
+# Copy the standalone application
+COPY --from=builder /app/.next/standalone ./
 
-# Copy the built application from the builder stage
-COPY --from=builder /app/.next ./.next
+# Copy the public folder
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.js ./next.config.js
+
+# Copy the static assets
+COPY --from=builder /app/.next/static ./.next/static
+
+# Copy the run script
 COPY --from=builder /app/run.sh ./run.sh
+
+# Copy the scheduled jobs
 COPY --from=builder /app/scheduled-jobs.json ./scheduled-jobs.json
-COPY --from=builder /app/package.json ./package.json
 
 # Expose the port Next.js runs on
 EXPOSE 3000
 
 # Command to run the application
-CMD ["npm", "start"]
+CMD ["/bin/bash", "run.sh"]
