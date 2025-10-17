@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
+import yaml from 'js-yaml';
 
 export async function POST(request: Request) {
   try {
@@ -19,7 +20,11 @@ export async function POST(request: Request) {
     const filePath = path.join(liveConfigPath, '.storage', fileName);
     const fileContent = await fs.readFile(filePath, 'utf8');
 
-    return NextResponse.json({ content: fileContent });
+    // Parse and re-serialize YAML to normalize content for comparison
+    const parsedContent = yaml.load(fileContent);
+    const normalizedContent = yaml.dump(parsedContent, { noRefs: true, sortKeys: true });
+
+    return NextResponse.json({ content: normalizedContent });
 
   } catch (error: unknown) {
     const err = error as Error & { code?: string; path?: string };
