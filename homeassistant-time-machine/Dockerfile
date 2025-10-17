@@ -37,4 +37,4 @@ COPY --from=builder /app/scheduled-jobs.json ./scheduled-jobs.json
 EXPOSE 3000
 
 # Command to run the application
-CMD ["/bin/bash", "run.sh"]
+CMD /bin/bash run.sh
