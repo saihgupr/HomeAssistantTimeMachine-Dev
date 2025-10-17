@@ -14,12 +14,12 @@ interface ItemDiffViewerProps {
   backupItem: Automation;
   liveConfigPath: string;
   mode: 'automations' | 'scripts';
-  backupTimestamp: number;
+  backupFolderName: string;
   onRestore: (item: Automation) => void;
   onClose: () => void;
 }
 
-export default function ItemDiffViewer({ backupItem, liveConfigPath, mode, backupTimestamp, onRestore, onClose }: ItemDiffViewerProps) {
+export default function ItemDiffViewer({ backupItem, liveConfigPath, mode, backupFolderName, onRestore, onClose }: ItemDiffViewerProps) {
   const [liveItem, setLiveItem] = useState<Automation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +79,7 @@ export default function ItemDiffViewer({ backupItem, liveConfigPath, mode, backu
               </h2>
               <p style={{ fontSize: '14px', color: '#9ca3af' }}>
                 {!liveItem
-                  ? `Backup from ${new Date(backupTimestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+                  ? `Backup from ${backupFolderName}`
                   : noChanges
                   ? 'No changes between backup and live version.'
                   : 'Comparing backup with current live version.'}

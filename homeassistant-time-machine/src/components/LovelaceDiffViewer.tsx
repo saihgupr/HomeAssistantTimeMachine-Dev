@@ -7,12 +7,12 @@ interface LovelaceDiffViewerProps {
   backupFileContent: string;
   liveFileContent: string | null;
   fileName: string;
-  backupTimestamp: number;
+  backupFolderName: string;
   onRestore: (fileName: string, content: string) => void;
   onClose: () => void;
 }
 
-export default function LovelaceDiffViewer({ backupFileContent, liveFileContent, fileName, backupTimestamp, onRestore, onClose }: LovelaceDiffViewerProps) {
+export default function LovelaceDiffViewer({ backupFileContent, liveFileContent, fileName, backupFolderName, onRestore, onClose }: LovelaceDiffViewerProps) {
   const oldContent = liveFileContent ?? `// This file does not exist in the current configuration.`;
   const newContent = backupFileContent;
   const noChanges = oldContent === newContent;
@@ -28,7 +28,7 @@ export default function LovelaceDiffViewer({ backupFileContent, liveFileContent,
               </h2>
               <p style={{ fontSize: '14px', color: '#9ca3af' }}>
                 {!liveFileContent
-                  ? `Backup from ${new Date(backupTimestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+                  ? `Backup from ${backupFolderName}`
                   : noChanges
                   ? 'No changes between backup and live version.'
                   : 'Comparing backup with current live version.'}

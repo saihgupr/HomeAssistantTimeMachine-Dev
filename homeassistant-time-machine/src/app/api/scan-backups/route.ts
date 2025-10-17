@@ -5,7 +5,7 @@ import path from 'path';
 
 interface BackupInfo {
   path: string;
-  createdAt: number;
+  folderName: string;
 }
 
 // This function will recursively scan directories.
@@ -18,14 +18,7 @@ async function getBackupDirs(dir: string): Promise<BackupInfo[]> {
     if (dirent.isDirectory()) {
       // Regex to match the final timestamped folder, e.g., 2025-06-02-215431
       if (/\d{4}-\d{2}-\d{2}-\d{6}$/.test(dirent.name)) {
-        const year = parseInt(dirent.name.substring(0, 4));
-        const month = parseInt(dirent.name.substring(5, 7)) - 1; // Month is 0-indexed
-        const day = parseInt(dirent.name.substring(8, 10));
-        const hour = parseInt(dirent.name.substring(11, 13));
-        const minute = parseInt(dirent.name.substring(13, 15));
-        const second = parseInt(dirent.name.substring(15, 17));
-        const date = new Date(year, month, day, hour, minute, second);
-        results.push({ path: fullPath, createdAt: date.getTime() });
+        results.push({ path: fullPath, folderName: dirent.name });
       } else {
         // Continue scanning deeper
         results = results.concat(await getBackupDirs(fullPath));
@@ -60,7 +53,7 @@ export async function POST(request: Request) {
     const backupDirs = await getBackupDirs(backupRootPath);
 
     // Sort descending to show the newest backups first
-    backupDirs.sort((a, b) => b.createdAt - a.createdAt);
+    backupDirs.sort((a, b) => b.folderName.localeCompare(a.folderName));
 
     return NextResponse.json({ backups: backupDirs });
   } catch (error: unknown) {
