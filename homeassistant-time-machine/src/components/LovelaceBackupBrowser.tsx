@@ -4,7 +4,7 @@ import ConfigMenu from './ConfigMenu';
 
 interface BackupInfo {
   path: string;
-  createdAt: number;
+  folderName: string;
 }
 
 interface LovelaceFile {
@@ -258,20 +258,6 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
     }
   };
 
-  const formatTimestamp = (timestamp: number) => {
-    const date = new Date(timestamp);
-    const formattedDate = new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: '2-digit',
-      year: 'numeric',
-    }).format(date);
-    const formattedTime = new Intl.DateTimeFormat('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    }).format(date);
-    return `${formattedDate} at ${formattedTime}`;
-  };
 
   useEffect(() => {
     if (notificationMessage) {
@@ -358,7 +344,7 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
                         borderRadius: '50%',
                         backgroundColor: selectedBackup?.path === backup.path ? 'white' : '#6b7280'
                       }} />
-                      <span style={{ fontWeight: '500' }}>{formatTimestamp(backup.createdAt)}</span>
+                      <span style={{ fontWeight: '500' }}>{backup.folderName}</span>
                     </div>
                   </button>
                 ))}
@@ -376,7 +362,7 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
                   Lovelace
                 </h2>
                 <p style={{ fontSize: '14px', color: '#9ca3af' }}>
-                  {selectedBackup ? formatTimestamp(selectedBackup.createdAt) : 'No backup selected'}
+                  {selectedBackup ? selectedBackup.folderName : 'No backup selected'}
                 </p>
               </div>
               
@@ -468,7 +454,7 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
           backupFileContent={backupFileContent}
           liveFileContent={liveFileContent}
           fileName={selectedItem.name}
-          backupTimestamp={selectedBackup ? selectedBackup.createdAt : 0}
+          backupFolderName={selectedBackup ? selectedBackup.folderName : ''}
           onClose={() => setSelectedItem(null)}
           onRestore={handleRestore}
         />
