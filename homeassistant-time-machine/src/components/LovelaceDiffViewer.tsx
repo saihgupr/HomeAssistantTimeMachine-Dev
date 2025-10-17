@@ -69,7 +69,7 @@ export default function LovelaceDiffViewer({ backupFileContent, liveFileContent,
                     <span style={{ fontSize: '14px', fontWeight: '500', color: '#d1d5db' }}>Current Version</span>
                   </div>
                   <div style={{ textAlign: 'center', padding: '8px', backgroundColor: 'rgba(37, 99, 235, 0.2)', borderRadius: '8px', border: '1px solid rgba(37, 99, 235, 0.3)' }}>
-                    <span style={{ fontSize: '14px', fontWeight: '500', color: '#60a5fa' }}>{new Date(backupTimestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                    <span style={{ fontSize: '14px', fontWeight: '500', color: '#60a5fa' }}>{backupFolderName}</span>
                   </div>
                 </div>
                 <div style={{ backgroundColor: '#1e1e1e', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
