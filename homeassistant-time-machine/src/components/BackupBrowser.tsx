@@ -77,6 +77,7 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
   };
 
   useEffect(() => {
+    const savedConfig = localStorage.getItem('haConfig');
     if (savedConfig) {
       setHaConfig(JSON.parse(savedConfig));
     }
