@@ -552,7 +552,7 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
                       {mode}
                     </h2>
                     <p style={{ fontSize: '14px', color: '#9ca3af' }}>
-                      {selectedBackup ? formatTimestamp(selectedBackup.createdAt) : 'No backup selected'}
+                      {selectedBackup ? selectedBackup.folderName : 'No backup selected'}
                     </p>
                   </div>
                   
