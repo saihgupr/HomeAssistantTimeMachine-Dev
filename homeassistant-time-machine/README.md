@@ -98,7 +98,7 @@ After running the container, proceed to the "Usage" section to configure the app
 
 ## Backup to Remote Share
 
-Inside Home Assistant, if you go to Settings>System>Storage>'Add network storage'. Set the name to 'backups' and usage to 'Media', fill in your remote share info. Then in Home Assistant Time Machine settings, put the backup path as '/media/backups', it should place them on your remote share.
+To configure backups to a remote share, first set up network storage within Home Assistant (Settings > System > Storage > 'Add network storage'). Name the share 'backups' and set its usage to 'Media'. Once configured, you can then specify the backup path in Home Assistant Time Machine settings as '/media/backups', which will direct backups to your remote share.
 
 ## Creating Backups
 
