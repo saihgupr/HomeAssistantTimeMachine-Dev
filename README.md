@@ -2,6 +2,17 @@
 
 Home Assistant Time Machine is a web-based tool that acts as a "Time Machine" for your Home Assistant configuration. It allows you to browse yaml backups and restore individual automations and scripts to your live configuration.
 
+## What's New!
+
+We've been busy adding exciting new features to enhance your Home Assistant Time Machine experience:
+
+*   **Backup Now Button:** Trigger an immediate backup of your Home Assistant configuration directly from the UI with a single click. This utilizes a new API endpoint for programmatic backups.
+*   **Date-Based Folder Names:** Backup folders are now intelligently named based on the date, making it easier to navigate and find specific backups.
+*   **Docker Container Installation:** Simplified installation process with a dedicated Docker container option, providing more flexibility for users without the Home Assistant Add-on store.
+*   **Optimized Image Size:** The Docker image has been significantly reduced in size through highly optimized image builds, making it faster to download and run.
+*   **Flexible Backup Locations:** You can now store your backups in either the `/share` or `/backup` directories, offering more options for integration with your Home Assistant setup.
+*   **Lovelace Backup Support:** Comprehensive backup and restore functionality for your Lovelace UI configurations, ensuring your dashboards are always safe.
+
 ## Screenshots
 
 ![Screenshot 1](https://i.imgur.com/h8JovLe.png)
@@ -79,6 +90,7 @@ After running the container, proceed to the "Usage" section to configure the app
     *   In the web UI, go to the settings menu.
     *   **Live Home Assistant Folder Path:** Set the path to your Home Assistant configuration directory (e.g., `/config`).
     *   **Backup Folder Path:** Set the path to the directory where your backups are stored (e.g., `/media/backups/yaml`).
+    *   **Backup to remote share:** Inside Home Assistant, if you go to Settings>System>Storage>'Add network storage'. Set the name to 'backups' and usage to 'Media', fill in your remote share info. Then in Home Assistant Time Machine settings, put the backup path as '/media/backups', it should place them on your remote share.
     *   **Home Assistant URL & Token:** Set the URL and a Long-Lived Access Token for your Home Assistant instance. This is needed for the feature that reloads Home Assistant after a restore.
     *   **Enable Scheduled Backup:** Toggle this option to enable or disable automatic backups.
     *   **Frequency:** Choose how often you want backups to run (e.g., Hourly, Daily, Weekly).
@@ -133,7 +145,8 @@ Here is an example of how to trigger a backup using `curl`:
 ```bash
 curl -X POST http://localhost:3000/api/backup-now \
 -H "Content-Type: application/json" \
--d '{
+-d 
+'{
   "liveFolderPath": "/config",
   "backupFolderPath": "/media/backups/yaml",
   "timezone": "America/New_York"
