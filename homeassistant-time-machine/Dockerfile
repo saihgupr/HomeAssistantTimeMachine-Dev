@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Copy package files and install all dependencies
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy the rest of the application source code
 COPY . .
@@ -20,7 +20,7 @@ WORKDIR /app
 
 # Copy package files and install only production dependencies
 COPY package.json package-lock.json ./
-RUN npm install --omit=dev
+RUN npm install --omit=dev --legacy-peer-deps
 
 # Copy the built application from the builder stage
 COPY --from=builder /app/.next ./.next
