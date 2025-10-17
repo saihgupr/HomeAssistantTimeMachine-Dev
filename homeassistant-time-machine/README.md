@@ -90,6 +90,7 @@ After running the container, proceed to the "Usage" section to configure the app
     *   In the web UI, go to the settings menu.
     *   **Live Home Assistant Folder Path:** Set the path to your Home Assistant configuration directory (e.g., `/config`).
     *   **Backup Folder Path:** Set the path to the directory where your backups are stored (e.g., `/media/backups/yaml`).
+    *   **Backup to remote share:** Inside Home Assistant, if you go to Settings>System>Storage>'Add network storage'. Set the name to 'backups' and usage to 'Media', fill in your remote share info. Then in Home Assistant Time Machine settings, put the backup path as '/media/backups', it should place them on your remote share.
     *   **Home Assistant URL & Token:** Set the URL and a Long-Lived Access Token for your Home Assistant instance. This is needed for the feature that reloads Home Assistant after a restore.
     *   **Enable Scheduled Backup:** Toggle this option to enable or disable automatic backups.
     *   **Frequency:** Choose how often you want backups to run (e.g., Hourly, Daily, Weekly).
