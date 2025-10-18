@@ -20,11 +20,7 @@ export async function POST(request: Request) {
     const filePath = path.join(backupPath, '.storage', fileName);
     const fileContent = await fs.readFile(filePath, 'utf8');
 
-    // Parse and re-serialize YAML to normalize content for comparison
-    const parsedContent = yaml.load(fileContent);
-    const normalizedContent = yaml.dump(parsedContent, { noRefs: true, sortKeys: true });
-
-    return NextResponse.json({ content: normalizedContent });
+    return NextResponse.json({ content: fileContent });
 
   } catch (error: unknown) {
     const err = error as Error & { code?: string; path?: string };

@@ -7,10 +7,13 @@ interface ConfigMenuProps {
   initialBackupFolderPath: string;
   initialLiveFolderPath: string;
   liveConfigPathError: string | null;
+  backupPathError: string | null;
   initialCronExpression: string;
+  onValidateBackupPath: (path: string) => void;
+  onValidateLivePath: (path: string) => void;
 }
 
-export default function ConfigMenu({ onClose, onSave, initialBackupFolderPath, initialLiveFolderPath, liveConfigPathError }: ConfigMenuProps) {
+export default function ConfigMenu({ onClose, onSave, initialBackupFolderPath, initialLiveFolderPath, liveConfigPathError, backupPathError, onValidateBackupPath, onValidateLivePath }: ConfigMenuProps) {
   const [haUrl, setHaUrl] = useState('');
   const [haToken, setHaToken] = useState('');
   const [backupFolderPath, setBackupFolderPath] = useState(initialBackupFolderPath || '/media/backups/yaml');
@@ -82,6 +85,11 @@ export default function ConfigMenu({ onClose, onSave, initialBackupFolderPath, i
 
   }, []);
 
+  useEffect(() => {
+    onValidateBackupPath(backupFolderPath);
+    onValidateLivePath(liveFolderPath);
+  }, []);
+
   const handleSave = async () => {
     const config = { haUrl, haToken, backupFolderPath, liveFolderPath };
     localStorage.setItem('haConfig', JSON.stringify({ haUrl, haToken }));
@@ -126,7 +134,7 @@ export default function ConfigMenu({ onClose, onSave, initialBackupFolderPath, i
   };
 
   const handleBackupNow = async () => {
-    setBackupNowMessage('Starting backup...');
+    setBackupNowMessage('Creating a backup...');
     try {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const response = await fetch('/api/backup-now', {
@@ -172,7 +180,7 @@ export default function ConfigMenu({ onClose, onSave, initialBackupFolderPath, i
             Test Connection
           </button>
           {testConnectionMessage && (
-            <p style={{ marginTop: '8px', fontSize: '12px', color: testConnectionMessage.includes('successful') ? '#4CAF50' : '#ef4444' }}>
+            <p style={{ marginTop: '8px', fontSize: '12px', color: testConnectionMessage.includes('Boom') ? '#4CAF50' : '#ef4444' }}>
               {testConnectionMessage}
             </p>
           )}
@@ -185,6 +193,7 @@ export default function ConfigMenu({ onClose, onSave, initialBackupFolderPath, i
             type="text"
             value={liveFolderPath}
             onChange={(e) => setLiveFolderPath(e.target.value)}
+            onBlur={(e) => onValidateLivePath(e.target.value)}
             style={{ width: '100%', padding: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', color: 'white', fontSize: '14px' }}
           />
           {liveConfigPathError && <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '4px' }}>{liveConfigPathError}</p>}
@@ -197,8 +206,10 @@ export default function ConfigMenu({ onClose, onSave, initialBackupFolderPath, i
             type="text"
             value={backupFolderPath}
             onChange={(e) => setBackupFolderPath(e.target.value)}
+            onBlur={(e) => onValidateBackupPath(e.target.value)}
             style={{ width: '100%', padding: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', color: 'white', fontSize: '14px' }}
           />
+          {backupPathError && <p style={{ color: '#ef4444', fontSize: '12px', marginTop: '4px' }}>{backupPathError}</p>}
           <button
             onClick={handleBackupNow}
             style={{ marginTop: '12px', padding: '8px 16px', borderRadius: '8px', fontWeight: '500', fontSize: '14px', border: '1px solid rgba(255, 255, 255, 0.1)', cursor: 'pointer', backgroundColor: 'transparent', color: '#9ca3af' }}

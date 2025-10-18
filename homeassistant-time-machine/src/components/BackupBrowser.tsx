@@ -39,6 +39,7 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
   const [isLoadingBackups, setIsLoadingBackups] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [backupError, setBackupError] = useState<string | null>(null);
+  const [backupPathError, setBackupPathError] = useState<string | null>(null);
   const [liveConfigPathError, setLiveConfigPathError] = useState<string | null>(null);
   const [notificationMessage, setNotificationMessage] = useState<string | null>(null);
   const [notificationType, setNotificationType] = useState<'success' | 'error' | null>(null);
@@ -52,6 +53,8 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
   const [isConfigMenuOpen, setConfigMenuOpen] = useState(false);
   const [haConfig, setHaConfig] = useState<HaConfig | null>(null);
   const [initialCronExpression, setInitialCronExpression] = useState('');
+
+
 
   const formatFolderName = (folderName: string) => {
     const year = parseInt(folderName.substring(0, 4));
@@ -94,31 +97,38 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
   }, []);
 
   useEffect(() => {
-    const validateLivePath = async () => {
+    const validate = async () => {
       if (!liveConfigPath) {
-        setLiveConfigPathError('Live Home Assistant Config Path cannot be empty.');
+        setLiveConfigPathError('');
         return;
       }
-
-      try {
-        const response = await fetch('/api/validate-path', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: liveConfigPath }),
-        });
-        const data = await response.json();
-        if (!data.isValid) {
-          setLiveConfigPathError(data.error);
-        } else {
-          setLiveConfigPathError(null);
-        }
-      } catch (err) {
-        setLiveConfigPathError('Error validating path.');
-      }
+      await validateLivePath(liveConfigPath);
     };
-
-    validateLivePath();
+    validate();
   }, [liveConfigPath]);
+
+  const validateLivePath = async (path: string) => {
+    if (!path) {
+      setLiveConfigPathError('');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/validate-path', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path }),
+      });
+      const data = await response.json();
+      if (!data.isValid) {
+        setLiveConfigPathError(data.error);
+      } else {
+        setLiveConfigPathError(null);
+      }
+    } catch (err) {
+      setLiveConfigPathError('Error validating path.');
+    }
+  };
 
   const sortedAndFilteredItems = useMemo(() => {
     const filtered = items.filter(item => 
@@ -202,6 +212,15 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
   }, [sortedAndFilteredItems, liveConfigPath, mode]);
 
   useEffect(() => {
+    const validate = async () => {
+      if (backupRootPath) {
+        await validateBackupPath(backupRootPath);
+      }
+    };
+    validate();
+  }, [backupRootPath]);
+
+  useEffect(() => {
     const fetchBackups = async () => {
       setIsLoadingBackups(true);
       setBackupError(null);
@@ -225,13 +244,34 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
       }
     };
 
-    if (backupRootPath) {
+    if (backupRootPath && !backupPathError) {
       fetchBackups();
+    } else {
+      setBackups([]);
+      setIsLoadingBackups(false);
     }
 
     setSelectedBackup(null);
     setItems([]);
-  }, [backupRootPath, mode]);
+  }, [backupRootPath, mode, backupPathError]);
+
+  const validateBackupPath = async (path: string) => {
+    try {
+      const response = await fetch('/api/scan-backups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ backupRootPath: path }),
+      });
+      const errorData = await response.json();
+      if (!response.ok && errorData.code === 'DIR_NOT_FOUND') {
+        setBackupPathError('Directory does not exist');
+      } else {
+        setBackupPathError(null);
+      }
+    } catch (err) {
+      setBackupPathError('Error validating path.');
+    }
+  };
 
   const handleSelectBackup = async (backup: BackupInfo) => {
     setSelectedBackup(backup);
@@ -278,7 +318,7 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
           service = 'script.reload';
           break;
         case 'lovelace':
-          setNotificationMessage('Lovelace file restored. A restart of Home Assistant is required to see changes.');
+          setNotificationMessage('Lovelace successfully restored! Restart Home Assistant to see changes.');
           setNotificationType('success');
           return;
         default:
@@ -298,7 +338,7 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
           throw new Error(errorData.error || `Failed to reload ${mode} in Home Assistant.`);
         }
 
-      setNotificationMessage(`${mode === 'automations' ? 'Automation' : 'Script'}s reloaded successfully in Home Assistant!`);
+      setNotificationMessage(`You did it! ${mode === 'automations' ? 'Automation' : 'Script'}s reloaded successfully in Home Assistant!`);
       setNotificationType('success');
     } catch (error: unknown) {
       const err = error as Error;
@@ -328,8 +368,8 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
         throw new Error(errorData.error || 'Failed to restart Home Assistant.');
       }
 
-      // setNotificationMessage('Home Assistant is restarting.');
-      // setNotificationType('success');
+      setNotificationMessage('Home Assistant is restarting...');
+      setNotificationType('success');
     } catch (error: unknown) {
       const err = error as Error;
       setNotificationMessage(`Error restarting Home Assistant: ${err.message}`);
@@ -391,10 +431,13 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
 
   useEffect(() => {
     if (notificationMessage) {
+      const isLovelaceRestore = notificationMessage === 'Lovelace successfully restored! Restart Home Assistant to see changes.';
+      const timeout = isLovelaceRestore ? 7000 : 5000;
+
       const timer = setTimeout(() => {
         setNotificationMessage(null);
         setNotificationType(null);
-      }, 5000); // Clear after 5 seconds
+      }, timeout);
       return () => clearTimeout(timer);
     }
   }, [notificationMessage]);
@@ -420,7 +463,7 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
           }}
         >
           {notificationMessage}
-          {mode === 'lovelace' && notificationType === 'success' && (
+          {mode === 'lovelace' && notificationType === 'success' && notificationMessage !== 'Home Assistant is restarting...' && (
             <button onClick={restartHomeAssistant} style={{ background: 'none', border: '1px solid white', color: 'white', fontSize: '14px', cursor: 'pointer', padding: '4px 8px', borderRadius: '4px' }}>
               Restart Now
             </button>
@@ -438,7 +481,10 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
           initialBackupFolderPath={backupRootPath}
           initialLiveFolderPath={liveConfigPath}
           liveConfigPathError={liveConfigPathError}
+          backupPathError={backupPathError}
           initialCronExpression={initialCronExpression}
+          onValidateBackupPath={validateBackupPath}
+          onValidateLivePath={validateLivePath}
         />
       )}
 
@@ -530,8 +576,8 @@ export default function BackupBrowser({ backupRootPath, liveConfigPath, onSaveCo
               </div>
               
               <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
-                {isLoadingBackups && <p style={{ textAlign: 'center', color: '#9ca3af' }}>Scanning...</p>}
-                {backupError && !isLoadingBackups && <p style={{ textAlign: 'center', color: '#ef4444' }}>{backupError}</p>}
+                {isLoadingBackups && !backupPathError && <p style={{ textAlign: 'center', color: '#9ca3af' }}>Lookin’ fer yer scripts…</p>}
+                
                 {!isLoadingBackups && backups.length > 0 && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {backups.map((backup) => (

@@ -36,32 +36,44 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
     }
 
-    const configFileName = mode === 'automations' ? 'automations.yaml' : 'scripts.yaml';
-    const configPath = path.join(liveConfigPath, configFileName);
+    let liveItemsMap: Record<string, any> = {};
 
-    const fileContent = await fs.readFile(configPath, 'utf8');
-    const items = yaml.load(fileContent) as Automation[] | Record<string, Omit<Automation, 'id'>>;
+    if (mode === 'automations') {
+      const configFileName = 'automations.yaml';
+      const configPath = path.join(liveConfigPath, configFileName);
+      const fileContent = await fs.readFile(configPath, 'utf8');
+      const items = yaml.load(fileContent) as Automation[] | Record<string, Omit<Automation, 'id'>>;
 
-    const liveItemsMap: Record<string, Automation> = {};
+      if (Array.isArray(items)) {
+          for (const id of itemIdentifiers) {
+              const liveItem = items.find(item => item.id === id || item.alias === id);
+              if (liveItem) {
+                  liveItemsMap[id] = liveItem;
+              }
+          }
+      } else {
+          return NextResponse.json({ error: `${configFileName} is not in the expected format.` }, { status: 500 });
+      }
+    } else if (mode === 'scripts') {
+      const configFileName = 'scripts.yaml';
+      const configPath = path.join(liveConfigPath, configFileName);
+      const fileContent = await fs.readFile(configPath, 'utf8');
+      const items = yaml.load(fileContent) as Automation[] | Record<string, Omit<Automation, 'id'>>;
 
-    if (mode === 'automations' && Array.isArray(items)) {
-        for (const id of itemIdentifiers) {
-            const liveItem = items.find(item => item.id === id || item.alias === id);
-            if (liveItem) {
-                liveItemsMap[id] = liveItem;
-            }
-        }
-    } else if (mode === 'scripts' && typeof items === 'object' && items !== null && !Array.isArray(items)) {
-        for (const id of itemIdentifiers) {
-            if (items[id]) {
-                liveItemsMap[id] = {
-                    id: id,
-                    ...(items[id] as Omit<Automation, 'id'>)
-                };
-            }
-        }
+      if (typeof items === 'object' && items !== null && !Array.isArray(items)) {
+          for (const id of itemIdentifiers) {
+              if (items[id]) {
+                  liveItemsMap[id] = {
+                      id: id,
+                      ...(items[id] as Omit<Automation, 'id'>)
+                  };
+              }
+          }
+      } else {
+          return NextResponse.json({ error: `${configFileName} is not in the expected format.` }, { status: 500 });
+      }
     } else {
-        return NextResponse.json({ error: `${configFileName} is not in the expected format.` }, { status: 500 });
+        return NextResponse.json({ error: `Unsupported mode: ${mode}` }, { status: 400 });
     }
 
     return NextResponse.json({ liveItems: liveItemsMap });

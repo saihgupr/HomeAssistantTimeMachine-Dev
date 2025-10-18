@@ -1,10 +1,10 @@
-# Home Assistant Time Machine
+# Home Assistant Time Machine Dev
 
 Home Assistant Time Machine is a web-based tool that acts as a "Time Machine" for your Home Assistant configuration. It allows you to browse yaml backups and restore individual automations and scripts to your live configuration.
 
 ## What's New!
 
-We've been busy adding exciting new features to enhance your Home Assistant Time Machine experience:
+I've been busy adding exciting new features to enhance your Home Assistant Time Machine experience:
 
 *   **Backup Now Button:** Trigger an immediate backup of your Home Assistant configuration directly from the UI with a single click. This utilizes a new API endpoint for programmatic backups.
 *   **Date-Based Folder Names:** Backup folders are now intelligently named based on the date, making it easier to navigate and find specific backups.
@@ -107,12 +107,12 @@ This addon relies on having file-based backups of your Home Assistant configurat
 ```bash
 #!/bin/bash
 
+### HOME ASSISTANT BACKUP SCRIPT ###
+
 # The directory where your Home Assistant configuration is stored.
-# Adjust this to your setup.
-CONFIG_DIR="/config"
+CONFIG_DIR="/homeassistant"
 
 # The root directory where you want to store your backups.
-# This should match the "Backup Folder Path" you set in the addon's UI.
 BACKUP_DIR="/media/backups/yaml"
 
 # Create a timestamped directory for the new backup.
@@ -120,27 +120,32 @@ DATE=$(date +%Y-%m-%d-%H%M%S)
 YEAR=$(date +%Y)
 MONTH=$(date +%m)
 BACKUP_PATH="$BACKUP_DIR/$YEAR/$MONTH/$DATE"
-mkdir -p "$BACKUP_PATH"
 
-# Copy the YAML files to the backup directory.
+# Create necessary directories
+mkdir -p "$BACKUP_PATH"
+mkdir -p "$BACKUP_PATH/.storage"
+
+# Copy YAML config files
 cp "$CONFIG_DIR"/*.yaml "$BACKUP_PATH"
 
-echo "Backup created at $BACKUP_PATH"
+# Copy Lovelace-related files from .storage
+cp "$CONFIG_DIR/.storage/lovelace" "$BACKUP_PATH/.storage" 2>/dev/null
+cp "$CONFIG_DIR/.storage/lovelace_dashboards" "$BACKUP_PATH/.storage" 2>/dev/null
+cp "$CONFIG_DIR/.storage/lovelace_resources" "$BACKUP_PATH/.storage" 2>/dev/null
+cp "$CONFIG_DIR/.storage/lovelace."* "$BACKUP_PATH/.storage" 2>/dev/null
+
+echo "Backup created at: $BACKUP_PATH"
 ```
 
 **Important:**
 *   You need to adjust the `CONFIG_DIR` and `BACKUP_DIR` variables in the script to match your Home Assistant setup.
 *   You should run this script at a regular interval (e.g., every 24 hours) to have up-to-date backups. You can use a `cron` job on your host machine or a Home Assistant automation with a `shell_command` integration to automate this.
 
-## Configuration
 
-The addon can be configured through the Home Assistant UI.
 
-*   **Web interface port:** The port on your host machine that will be mapped to the addon's web interface.
+## API Endpoints
 
-All other configuration is done within the application's web UI.
-
-## Triggering a Backup via API
+### Triggering a Backup via API
 
 You can trigger a backup programmatically by sending a POST request to the `/api/backup-now` endpoint. This is the same action that is performed when clicking the "Backup Now" button in the web UI.
 
@@ -149,7 +154,8 @@ Here is an example of how to trigger a backup using `curl`:
 ```bash
 curl -X POST http://localhost:3000/api/backup-now \
 -H "Content-Type: application/json" \
--d '{
+-d 
+'{ 
   "liveFolderPath": "/config",
   "backupFolderPath": "/media/backups/yaml",
   "timezone": "America/New_York"
@@ -159,5 +165,43 @@ curl -X POST http://localhost:3000/api/backup-now \
 **Parameters:**
 
 *   `liveFolderPath` (string, required): The absolute path to your live Home Assistant configuration directory.
-*   `backupFolderPath` (string, required): The absolute path to the directory where you want to store backups.
-*   `timezone` (string, required): The timezone to use for the backup timestamp (e.g., `America/New_York`). You can find a list of valid timezones [here](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+    *   `backupFolderPath` (string, required): The absolute path to the directory where you want to store backups.
+
+### Retrieving Scheduled Backups via API
+
+You can retrieve a list of all configured scheduled backup jobs by sending a GET request to the `/api/schedule-backup` endpoint.
+
+Here is an example of how to retrieve scheduled backups using `curl`:
+
+```bash
+curl http://localhost:3000/api/schedule-backup
+```
+
+The response will be a JSON object containing your scheduled jobs.
+
+### Scanning Backups via API
+
+You can programmatically trigger a scan of your backup directory and retrieve a list of all available backups by sending a POST request to the `/api/scan-backups` endpoint.
+
+Here is an example of how to scan backups using `curl`:
+
+```bash
+curl -X POST http://localhost:3000/api/scan-backups \
+-H "Content-Type: application/json" \
+-d '{ "backupRootPath": "/media/backups/yamls" }'
+```
+
+**Parameters:**
+
+*   `backupRootPath` (string, required): The absolute path to the root directory where your backups are stored.
+
+The response will be a JSON object containing a list of your backup folders.
+
+## Configuration
+
+The addon can be configured through the Home Assistant UI.
+
+*   **Web interface port:** The port on your host machine that will be mapped to the addon's web interface.
+
+All other configuration is done within the application's web UI.
+    

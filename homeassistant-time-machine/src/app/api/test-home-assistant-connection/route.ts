@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (response.ok) {
-      return NextResponse.json({ success: true, message: 'Connection successful!' });
+      return NextResponse.json({ success: true, message: 'Boom — we’re in.' });
     } else {
       const errorText = await response.text();
       return NextResponse.json({ success: false, message: `Connection failed: ${response.status} - ${errorText}` }, { status: response.status });

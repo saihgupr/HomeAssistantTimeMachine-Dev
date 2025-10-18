@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     const err = error as Error & { code?: string; path?: string };
     // Handle errors, e.g., directory not found
     if (err.code === 'ENOENT') {
-        return NextResponse.json({ error: `Directory not found: ${err.path}` }, { status: 404 });
+        return NextResponse.json({ error: `Directory not found: ${err.path}`, code: 'DIR_NOT_FOUND' }, { status: 404 });
     }
     console.error(err);
     return NextResponse.json({ error: 'Failed to scan backup directory.', details: err.message }, { status: 500 });

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import LovelaceDiffViewer from './LovelaceDiffViewer';
 import ConfigMenu from './ConfigMenu';
+import yaml from 'js-yaml';
 
 interface BackupInfo {
   path: string;
@@ -9,6 +10,7 @@ interface BackupInfo {
 
 interface LovelaceFile {
   name: string;
+  status?: 'changed' | 'deleted' | 'unchanged';
 }
 
 interface BackupBrowserProps {
@@ -68,6 +70,8 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
   const [selectedItem, setSelectedItem] = useState<LovelaceFile | null>(null);
   const [backupFileContent, setBackupFileContent] = useState('');
   const [liveFileContent, setLiveFileContent] = useState<string | null>('');
+  const [itemStatuses, setItemStatuses] = useState<Record<string, string>>({});
+  const [isLoadingDiff, setIsLoadingDiff] = useState(false);
 
   useEffect(() => {
     const savedConfig = localStorage.getItem('haConfig');
@@ -163,20 +167,64 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
     setSelectedBackup(backup);
     setIsLoadingItems(true);
     setItems([]);
+    setItemStatuses({});
     setError(null);
     try {
-      const response = await fetch('/api/get-backup-lovelace', {
+      // Fetch backup Lovelace files (names only initially)
+      const backupFilesResponse = await fetch('/api/get-backup-lovelace', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ backupPath: backup.path }),
       });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Failed to load lovelace files`);
+      if (!backupFilesResponse.ok) {
+        const errorData = await backupFilesResponse.json();
+        throw new Error(errorData.error || `Failed to load lovelace files from backup`);
       }
-      const data = await response.json();
-      const files = data.lovelaceFiles.map((file: string) => ({ name: file }));
-      setItems(files || []);
+      const backupFilesData = await backupFilesResponse.json();
+      const backupFileNames: string[] = backupFilesData.lovelaceFiles || [];
+
+      const newStatuses: Record<string, string> = {};
+      const updatedBackupFiles = await Promise.all(backupFileNames.map(async (fileName) => {
+        let liveContent: string | undefined = undefined;
+        try {
+          const liveFileResponse = await fetch('/api/get-live-lovelace-file', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ liveConfigPath, fileName: fileName }),
+          });
+          if (liveFileResponse.ok) {
+            const liveFileData = await liveFileResponse.json();
+            liveContent = liveFileData.content;
+          }
+        } catch (error) {
+          console.error(`Error fetching live content for ${fileName}:`, error);
+        }
+
+        let status: 'changed' | 'deleted' | 'unchanged' = 'unchanged';
+
+        if (liveContent === undefined || liveContent === null) {
+          status = 'deleted';
+        } else {
+          // Fetch backup file content for comparison
+          const backupFileContentResponse = await fetch('/api/get-backup-lovelace-file', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ backupPath: backup.path, fileName: fileName }),
+          });
+          const backupFileContentData = await backupFileContentResponse.json();
+          const backupContent = backupFileContentData.content;
+
+          if (backupContent !== liveContent) {
+            status = 'changed';
+          }
+        }
+        newStatuses[fileName] = status;
+        return { name: fileName, status };
+      }));
+
+      setItemStatuses(newStatuses);
+      setItems(updatedBackupFiles);
+
     } catch (err: unknown) {
       const error = err as Error;
       setError(error.message);
@@ -187,6 +235,9 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
 
   const handleSelectItem = async (item: LovelaceFile) => {
     setSelectedItem(item);
+    setBackupFileContent(''); // Clear previous content
+    setLiveFileContent(null); // Clear previous content
+    setIsLoadingDiff(true); // Set loading state
     try {
       const backupResponse = await fetch('/api/get-backup-lovelace-file', {
         method: 'POST',
@@ -196,19 +247,26 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
       const backupData = await backupResponse.json();
       setBackupFileContent(backupData.content);
 
-      const liveResponse = await fetch('/api/get-live-lovelace-file', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ liveConfigPath, fileName: item.name }),
-      });
-      if (liveResponse.ok) {
-        const liveData = await liveResponse.json();
-        setLiveFileContent(liveData.content);
+      // Only fetch live content if the item is not marked as deleted
+      if (item.status !== 'deleted') {
+        const liveResponse = await fetch('/api/get-live-lovelace-file', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ liveConfigPath, fileName: item.name }),
+        });
+        if (liveResponse.ok) {
+          const liveData = await liveResponse.json();
+          setLiveFileContent(liveData.content);
+        } else {
+          setLiveFileContent(null);
+        }
       } else {
-        setLiveFileContent(null);
+        setLiveFileContent(null); // If deleted, there is no live content
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setIsLoadingDiff(false); // Clear loading state
     }
   };
 
@@ -340,7 +398,7 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
           </div>
           
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
-            {isLoadingBackups && <p style={{ textAlign: 'center', color: '#9ca3af' }}>Scanning...</p>}
+            {isLoadingBackups && <p style={{ textAlign: 'center', color: '#9ca3af' }}>Lookin’ fer yer scripts…</p>}
             {backupError && !isLoadingBackups && <p style={{ textAlign: 'center', color: '#ef4444' }}>{backupError}</p>}
             {!isLoadingBackups && backups.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -422,7 +480,7 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
               </svg>
               <input
                 type="text"
-                placeholder={`Search Lovelace Files...`}
+                placeholder={`Search lovelace files...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{ width: '100%', paddingLeft: '48px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px', backgroundColor: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '12px', color: 'white', fontSize: '14px' }}
@@ -458,6 +516,16 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
                         </h3>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {item.status === 'changed' && (
+                          <span style={{ padding: '4px 12px', backgroundColor: 'rgba(249, 115, 22, 0.2)', color: '#f97316', fontSize: '12px', fontWeight: '500', borderRadius: '9999px', border: '1px solid rgba(249, 115, 22, 0.3)' }}>
+                            Changed
+                          </span>
+                        )}
+                        {item.status === 'deleted' && (
+                          <span style={{ padding: '4px 12px', backgroundColor: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', fontSize: '12px', fontWeight: '500', borderRadius: '9999px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                            Deleted
+                          </span>
+                        )}
                         <svg style={{ width: '20px', height: '20px', color: '#6b7280' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
@@ -482,6 +550,7 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
           backupFolderName={selectedBackup ? selectedBackup.folderName : ''}
           onClose={() => setSelectedItem(null)}
           onRestore={handleRestore}
+          isLoadingDiff={isLoadingDiff}
         />
       )}
     </>

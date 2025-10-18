@@ -104,8 +104,8 @@ export default function ItemDiffViewer({ backupItem, liveConfigPath, mode, backu
                 {!liveItem
                   ? `Backup from ${formatFolderName(backupFolderName)}`
                   : noChanges
-                  ? 'No changes between backup and live version.'
-                  : 'Comparing backup with current live version.'}
+                  ? 'No changes between backup and live version, captain.'
+                  : 'Compare backup with current live version.'}
               </p>
             </div>
             <button
@@ -119,30 +119,57 @@ export default function ItemDiffViewer({ backupItem, liveConfigPath, mode, backu
           </div>
         </div>
 
-        <main style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+        <main style={{ flex: 1, overflowY: 'auto', padding: '12px 24px' }}>
           {isLoading && <p style={{ padding: '16px', color: '#9ca3af' }}>Loading live version...</p>}
           {error && <p style={{ padding: '16px', color: '#ef4444' }}>Error: {error}</p>}
           {!isLoading && !error && (
             <>
               {!liveItem ? (
-                <div style={{ textAlign: 'center', padding: '16px' }}>
-                  <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#ef4444', marginBottom: '16px' }}>This item has been deleted.</h3>
-                  <p style={{ color: '#9ca3af', marginBottom: '24px' }}>You can restore it from this backup version.</p>
-                  <pre style={{ padding: '16px', backgroundColor: '#1e1e1e', borderRadius: '12px', textAlign: 'left', fontSize: '14px', color: '#d1d5db', whiteSpace: 'pre-wrap', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                <div style={{ textAlign: 'center', padding: '0px 16px' }}>
+                  <div style={{
+                    padding: '11px 8px',
+                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                    color: '#f87171',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginBottom: '16px'
+                  }}>
+                    <span>This item has been deleted. You can restore it from this backup version tho.</span>
+                  </div>
+                  <pre style={{ padding: '16px', backgroundColor: '#1e1e1e', borderRadius: '12px', textAlign: 'left', fontSize: '14px', color: '#d1d5db', whiteSpace: 'pre-wrap', border: '1px solid rgba(255, 255, 255, 0.05)', marginTop: '8px' }}>
                     <code>{newYaml}</code>
                   </pre>
                 </div>
               ) : noChanges ? (
-                <div style={{ textAlign: 'center', padding: '16px' }}>
-                  <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#9ca3af', marginBottom: '16px' }}>No changes detected.</h3>
-                  <pre style={{ padding: '16px', backgroundColor: '#1e1e1e', borderRadius: '12px', textAlign: 'left', fontSize: '14px', color: '#d1d5db', whiteSpace: 'pre-wrap', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                <div style={{ textAlign: 'center', padding: '0px 16px' }}>
+                  <div style={{
+                    padding: '11px 8px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    color: '#d1d5db',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    borderRadius: '8px',
+                    border: 'none',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginBottom: '16px'
+                  }}>
+                    <span>Current Version</span>
+                  </div>
+                  <pre style={{ padding: '16px', backgroundColor: '#1e1e1e', borderRadius: '12px', textAlign: 'left', fontSize: '14px', color: '#d1d5db', whiteSpace: 'pre-wrap', border: '1px solid rgba(255, 255, 255, 0.05)', marginTop: '8px' }}>
                     <code>{newYaml}</code>
                   </pre>
                 </div>
               ) : (
                 <>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                    <div style={{ textAlign: 'center', padding: '8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px' }}>
+                    <div style={{ textAlign: 'center', padding: '11px 8px', backgroundColor: 'rgba(255, 255, 255, 0.05)', borderRadius: '8px' }}>
                       <span style={{ fontSize: '14px', fontWeight: '500', color: '#d1d5db' }}>Current Version</span>
                     </div>
                     <div style={{ textAlign: 'center', padding: '8px', backgroundColor: 'rgba(37, 99, 235, 0.2)', borderRadius: '8px', border: '1px solid rgba(37, 99, 235, 0.3)' }}>
