@@ -31,6 +31,7 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
   const [error, setError] = useState<string | null>(null);
   const [backupError, setBackupError] = useState<string | null>(null);
   const [liveConfigPathError, setLiveConfigPathError] = useState<string | null>(null);
+  const [backupPathError, setBackupPathError] = useState<string | null>(null);
   const [notificationMessage, setNotificationMessage] = useState<string | null>(null);
   const [notificationType, setNotificationType] = useState<'success' | 'error' | null>(null);
 
@@ -90,31 +91,52 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
       .catch(error => console.error('Failed to fetch schedule:', error));
   }, []);
 
+  const onValidateBackupPath = async (path: string) => {
+    if (!path) {
+      setBackupPathError('Backup Folder Path cannot be empty.');
+      return;
+    }
+    try {
+      const response = await fetch('/api/validate-path', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path }),
+      });
+      const data = await response.json();
+      if (!data.isValid) {
+        setBackupPathError(data.error);
+      } else {
+        setBackupPathError(null);
+      }
+    } catch (err) {
+      setBackupPathError('Error validating path.');
+    }
+  };
+
+  const onValidateLivePath = async (path: string) => {
+    if (!path) {
+      setLiveConfigPathError('Live Home Assistant Config Path cannot be empty.');
+      return;
+    }
+    try {
+      const response = await fetch('/api/validate-path', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path }),
+      });
+      const data = await response.json();
+      if (!data.isValid) {
+        setLiveConfigPathError(data.error);
+      } else {
+        setLiveConfigPathError(null);
+      }
+    } catch (err) {
+      setLiveConfigPathError('Error validating path.');
+    }
+  };
+
   useEffect(() => {
-    const validateLivePath = async () => {
-      if (!liveConfigPath) {
-        setLiveConfigPathError('Live Home Assistant Config Path cannot be empty.');
-        return;
-      }
-
-      try {
-        const response = await fetch('/api/validate-path', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: liveConfigPath }),
-        });
-        const data = await response.json();
-        if (!data.isValid) {
-          setLiveConfigPathError(data.error);
-        } else {
-          setLiveConfigPathError(null);
-        }
-      } catch (err) {
-        setLiveConfigPathError('Error validating path.');
-      }
-    };
-
-    validateLivePath();
+    onValidateLivePath(liveConfigPath);
   }, [liveConfigPath]);
 
   const sortedAndFilteredItems = useMemo(() => {
@@ -384,7 +406,10 @@ export default function LovelaceBackupBrowser({ backupRootPath, liveConfigPath, 
           initialBackupFolderPath={backupRootPath}
           initialLiveFolderPath={liveConfigPath}
           liveConfigPathError={liveConfigPathError}
+          backupPathError={backupPathError}
           initialCronExpression={initialCronExpression}
+          onValidateBackupPath={onValidateBackupPath}
+          onValidateLivePath={onValidateLivePath}
         />
       )}
 
