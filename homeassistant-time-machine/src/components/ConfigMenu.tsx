@@ -88,7 +88,7 @@ export default function ConfigMenu({ onClose, onSave, initialBackupFolderPath, i
   useEffect(() => {
     onValidateBackupPath(backupFolderPath);
     onValidateLivePath(liveFolderPath);
-  }, []);
+  }, [backupFolderPath, liveFolderPath, onValidateBackupPath, onValidateLivePath]);
 
   const handleSave = async () => {
     const config = { haUrl, haToken, backupFolderPath, liveFolderPath };

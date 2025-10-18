@@ -36,7 +36,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
     }
 
-    let liveItemsMap: Record<string, any> = {};
+    const liveItemsMap: Record<string, any> = {};
 
     if (mode === 'automations') {
       const configFileName = 'automations.yaml';
